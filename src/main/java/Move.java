@@ -1,4 +1,5 @@
-package model;
+import model.ActionType;
+import model.VehicleType;
 
 /**
  * Стратегия игрока может управлять юнитами посредством установки свойств объекта данного класса.
@@ -347,5 +348,9 @@ public class Move {
      */
     public void setVehicleId(long vehicleId) {
         this.vehicleId = vehicleId;
+    }
+
+    public boolean toJson() {
+        return false;
     }
 }

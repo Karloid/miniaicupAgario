@@ -9,21 +9,6 @@ import static model.FacilityType.CONTROL_CENTER;
 import static model.FacilityType.VEHICLE_FACTORY;
 import static model.VehicleType.*;
 
-//TODO repeat game http://russianaicup.ru/game/view/175080 look at stupid moves in top right corners
-
-//TODO dynamic group size
-//..if
-//TODO reuse group numbers
-//TODO group number pool
-
-//TODO с завода 2 ряда танков, 2 ряда хилок, 2 ряда вертолетов
-
-//TODO делить ARRV на две группы
-
-//TODO если в улугу есть враг то не отталкивать от этого угла
-
-//TODO repeat game http://russianaicup.ru/game/view/196079 mb 16 facilities
-
 @SuppressWarnings({"UnsecureRandomNumberGeneration", "FieldCanBeLocal", "unused", "OverlyLongMethod"})
 public final class MyStrategy implements Strategy {
     public static final int WORLD_CELL_SIZE = 32;
@@ -1952,7 +1937,7 @@ public final class MyStrategy implements Strategy {
 
     void log(String s) {
         if (logsEnabled) {
-            System.out.println(world.getTickIndex() + ": " + s);
+            System.err.println(world.getTickIndex() + ": " + s);
         }
     }
 

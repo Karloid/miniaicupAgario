@@ -13,9 +13,6 @@ allprojects {
     }
 }
 
-project(":core") {
-    apply plugin: "java"
-}
 group 'com.krld'
 version '1.0'
 
