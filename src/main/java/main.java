@@ -1,9 +1,9 @@
-import model.World;
-
 import java.util.Scanner;
 
 public class main {
     public static void main(String[] args) {
+        Player player = new Player();
+
         MyStrategy myStrategy = new MyStrategy();
         int i = 0;
 
@@ -15,7 +15,7 @@ public class main {
             Move move = new Move();
             World world = World.parse(nextString);
             world.tickIndex = i;
-            myStrategy.move(new Player(), world, game, move);
+            myStrategy.move(player, world, game, move);
 
             System.out.println(move.toJson());
             i++;

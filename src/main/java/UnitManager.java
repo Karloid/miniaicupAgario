@@ -1,7 +1,4 @@
-import model.Facility;
-import model.Vehicle;
 import model.VehicleType;
-import model.VehicleUpdate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,7 +8,6 @@ public class UnitManager {
     private MyStrategy mys;
 
     final Map<Long, VehicleWrapper> vehicleById = new HashMap<>();
-    final Map<Long, FacilityWrapper> facilityById = new HashMap<>();
     private List<VehicleWrapper> deadVehicles = new ArrayList<>();
 
     TickStats myStats;
@@ -39,7 +35,6 @@ public class UnitManager {
 
 
         initTickVehCalcStats();
-        initTickFacUpdates();
 
 
         maxMyHp = streamVehicles(Ownership.ALLY).max(Comparator.comparingInt(value -> value.v.getDurability())).map(vehicleWrapper -> vehicleWrapper.v.getDurability()).orElse(50);
@@ -52,20 +47,6 @@ public class UnitManager {
         }
     }
 
-    private void initTickFacUpdates() {
-        //facilities
-        Facility[] facilities = mys.world.getFacilities();
-        if (facilityById.isEmpty()) {
-            for (Facility facility : facilities) {
-                facilityById.put(facility.getId(), new FacilityWrapper(facility, mys));
-            }
-        } else {
-            for (int i = 0; i < facilities.length; i++) {
-                Facility facility = facilities[i];
-                facilityById.get(facility.getId()).update(facility);
-            }
-        }
-    }
 
     private void initTickVehCalcStats() {
         Collection<VehicleWrapper> allUnits = vehicleById.values();
@@ -80,6 +61,7 @@ public class UnitManager {
     }
 
     private void initTickVehUpdates() {
+/*
         for (VehicleUpdate vehicleUpdate : mys.world.getVehicleUpdates()) {
             long vehicleId = vehicleUpdate.getId();
 
@@ -103,13 +85,16 @@ public class UnitManager {
                 vehicleById.remove(veh.v.getId());
             }
         }
+*/
     }
 
     private void initTickNewVehicles() {
+/*
         for (Vehicle vehicle : mys.world.getNewVehicles()) {
             VehicleWrapper mv = new VehicleWrapper(vehicle, mys);
             vehicleById.put(vehicle.getId(), mv);
         }
+*/
     }
 
     public VehicleWrapper get(long id) {

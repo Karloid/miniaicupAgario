@@ -225,7 +225,5 @@ public final class Point2D {
         this.val = val;
     }
 
-    public double getDistanceTo(FacilityWrapper fw) {
-        return getDistanceTo(fw.getCenterPos());
-    }
+
 }

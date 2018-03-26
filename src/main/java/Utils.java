@@ -13,10 +13,13 @@ public class Utils {
                     },               // combiner
                     summary -> new PointsInfo(summary));
     
-    public static final String LOG_NUCLEAR_STRIKE = "NUCLEAR_STRIKE";
     static final String LOG_MOVING = "MOVING";
 
     public static String format(double v) {
         return String.format("%.2f", v);
+    }
+
+    static double distanceTo(int dx, int dy) {
+        return Math.sqrt(dx * dx + dy * dy);
     }
 }

@@ -1,5 +1,3 @@
-package model;
-
 import org.json.JSONObject;
 
 /**
@@ -20,4 +18,7 @@ public class World {
     }
 
 
+    public int getTickIndex() {
+        return tickIndex;
+    }
 }

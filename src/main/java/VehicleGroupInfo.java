@@ -22,7 +22,6 @@ public class VehicleGroupInfo {
     public int groupNumber;
     public PlainArray potentialMap;
     public int potentialMapCalcAt;
-    public FacilityWrapper goToFacility;
     public int switchCount;
     public boolean nextShrinkIsScale;
     public boolean shrinkRotateToRight;
@@ -61,18 +60,7 @@ public class VehicleGroupInfo {
     public List<VehicleWrapper> countWillBeFurtherThenBefore(Point2D moveVector, Point2D target) {
         List<VehicleWrapper> o = new ArrayList<>();
 
-        for (int i = 0; i < vehicles.size(); i++) {
-            VehicleWrapper vehicle = vehicles.get(i);
 
-            double before = target.getDistanceTo(vehicle) + MyStrategy.GROUP_SIZE;
-
-            Point2D newPos = moveVector.add(vehicle.v.getX(), vehicle.v.getY());
-            double after = target.getDistanceTo(newPos);
-            if (after > before) {
-                o.add(vehicle);
-            }
-
-        }
         return o;
     }
 
@@ -82,12 +70,7 @@ public class VehicleGroupInfo {
             VehicleWrapper vehicle = vehicles.get(i);
             sum += vehicle.v.getDurability();
         }
-        return sum / (vehicles.size() * myStrategy.getDurability(vehicleType) * 1.f);
-    }
-
-    public Point2D getCellAveragePoint() {
-        Point2D averagePoint = getAveragePoint();
-        return new Point2D((int) (averagePoint.getX() / myStrategy.cellSize), (int) (averagePoint.getY() / myStrategy.cellSize));
+        return sum;
     }
 
     public boolean isAeral() {
@@ -95,7 +78,7 @@ public class VehicleGroupInfo {
     }
 
     public Point2D getGoToFacilityPoint() {
-        Point2D centerPos = goToFacility.getCenterPos();
+        Point2D centerPos = null;
         //if (count > 50) {
             centerPos = centerPos.add(16, 16);
         /*} else {        //TOO FAR

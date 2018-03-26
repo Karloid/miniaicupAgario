@@ -1,11 +1,8 @@
-import model.TerrainType;
 import model.Vehicle;
-import model.VehicleType;
-import model.WeatherType;
 
 public class VehicleWrapper {
     public static final Point2D NOT_MOVING = new Point2D(0, 0);
-    public final boolean isEnemy;
+    public boolean isEnemy;
     private Point2D moveVector;
     public Vehicle v;
     private final MyStrategy mys;
@@ -18,7 +15,7 @@ public class VehicleWrapper {
         this.mys = mys;
         setUpdatedAt(mys.world.getTickIndex());
         moveVector = NOT_MOVING;
-        isEnemy = mys.me.getId() != v.getPlayerId();
+        // isEnemy = mys.me.getId() != v.getPlayerId();
     }
 
     public void setUpdatedAt(int tickIndex) {
@@ -107,6 +104,7 @@ public class VehicleWrapper {
     }
 
     public String getCurrentPlace() {
+/*
         int x = (int) (getX() / 32);
         int y = (int) (getY() / 32);
 
@@ -117,9 +115,12 @@ public class VehicleWrapper {
             WeatherType weatherType = mys.weatherTypeByCellXY[x][y];
             return weatherType.toString();
         }
+*/
+        return "";
     }
 
     private double getVisibleKoeff() {
+/*
         int x = (int) (getX() / 32);
         int y = (int) (getY() / 32);
 
@@ -150,6 +151,8 @@ public class VehicleWrapper {
             }
         }
         return k;
+*/
+        return 1;
     }
 
     public int getCellX(int cellSize) {

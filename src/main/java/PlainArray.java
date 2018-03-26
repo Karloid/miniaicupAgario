@@ -66,7 +66,7 @@ public class PlainArray {
         int endYAt = min(y + radius, cellsHeight - 1);
         for (int xx = startXAt; xx <= endXAt; xx++) {
             for (int yy = startYAt; yy <= endYAt; yy++) {
-                double distance = MyStrategy.distanceTo(x - xx, y - yy);
+                double distance = Utils.distanceTo(x - xx, y - yy);
                 if (distance <= radius) {
                     if (smoothType == MyStrategy.PLAIN_SMOOTH) {
                         add(xx, yy, (int) (val * (1 - distance / radius)));
