@@ -2,7 +2,7 @@ import java.util.Random;
 
 public class MyStrategy {
     private long elapsed;
-    private boolean logsEnabled;
+    ;
     public Player me;
     public World world;
     private Game game;
@@ -23,7 +23,7 @@ public class MyStrategy {
             long start = System.currentTimeMillis();
             initializeTick(me, world, game, move);
             initializeStrategy(world, game);
-
+            log("move start");
             painter.onStartTick();
 
 
@@ -45,7 +45,7 @@ public class MyStrategy {
             painter.onEndTick();
         } catch (Throwable e) {
             e.printStackTrace(); // is bad
-            if (logsEnabled) {
+            if (Main.isLocalRun) {
                 throw new RuntimeException(e);
             }
         }
@@ -75,19 +75,17 @@ public class MyStrategy {
         if (random == null) {
             random = new Random(/*game.getRandomSeed()*/);
 
-           // worldWidth = (int) world.getWidth(); //TODO
-           // worldHeight = (int) world.getHeight(); //TODO
-           // centerPoint = new Point2D(worldWidth / 2, worldHeight / 2); //TODO
+            // worldWidth = (int) world.getWidth(); //TODO
+            // worldHeight = (int) world.getHeight(); //TODO
+            // centerPoint = new Point2D(worldWidth / 2, worldHeight / 2); //TODO
 
             painter.onInitializeStrategy();
         }
     }
 
     public void log(String s) {
-        if (logsEnabled) {
-            System.err.println(s);
+        if (Main.isLocalRun) {
+            Utils.appendToLogFile((world == null ? "0" : world.tickIndex) + ": " + s);
         }
     }
-
-
 }
