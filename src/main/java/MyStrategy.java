@@ -1,7 +1,4 @@
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class MyStrategy {
     private long elapsed;
@@ -62,7 +59,18 @@ public class MyStrategy {
     }
 
     private void simpleMove() {
-        List<Unit> targets = world.food;
+        Unit me = world.mines.get(0);
+
+        Optional<Unit> min = world.enemies.stream().filter(unit -> me.mass / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+        if (min.isPresent()) {
+            Unit enemy = min.get();
+            log("Moving to enemy! ratio is " + Utils.format(me.mass / enemy.mass) + " " + enemy);
+            move.goTo(enemy);
+            return;
+        }
+
+        List<Unit> targets = new ArrayList<>(world.food);
+        targets.addAll(world.ejections);
         if (targets.isEmpty()) {
             if (world.tickIndex - randomPointGeneratedTick > 30) {
                 nextRandomPoint = getMapRandomPoint();
@@ -71,7 +79,7 @@ public class MyStrategy {
             move.goTo(nextRandomPoint);
             return;
         }
-        Unit me = world.mines.get(0);
+
         Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
         move.goTo(max);
 

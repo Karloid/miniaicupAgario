@@ -42,7 +42,7 @@ public class Unit {
                     Utils.log("ERROR unknow type " + t);
             }
             o.type = ttt;
-        }  else {
+        } else {
             o.type = UnitType.UNKNOWN;
         }
 
@@ -116,5 +116,23 @@ public class Unit {
      */
     public double getRadius() {
         return radius;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Unit{");
+        sb.append("radius=").append(radius);
+        sb.append(", id='").append(id).append('\'');
+        sb.append(", x=").append(x);
+        sb.append(", y=").append(y);
+        sb.append(", type=").append(type);
+        if (speedX != 0) {
+            sb.append(", speedX=").append(speedX);
+            sb.append(", speedY=").append(speedY);
+            sb.append(", timeToFuse=").append(timeToFuse);
+        }
+        sb.append(", mass=").append(mass);
+        sb.append('}');
+        return sb.toString();
     }
 }
