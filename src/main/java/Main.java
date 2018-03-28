@@ -1,9 +1,10 @@
 import java.io.BufferedInputStream;
+import java.util.Date;
 import java.util.Scanner;
 
 /*
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar /Users/fox/projects/miniaicup2/build/libs/miniaicup2-1.0-all.jar
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -jar /Users/fox/projects/miniaicup2/build/libs/miniaicup2-1.0-all.jar
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/build/libs/miniaicup2-1.0-all.jar
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/build/libs/miniaicup2-1.0-all.jar
 
 
 * */
@@ -13,6 +14,8 @@ public class Main {
     public static void main(String[] args) {
         if (isLocalRun) {
             System.setErr(Utils.getPrintStream());
+           // System.setOut(new PrintStream(new TeeOutputStream(Utils.getPrintStream(), System.out)));
+            Utils.appendToLogFile("Start " + new Date());
         }
 
         Player player = new Player();
