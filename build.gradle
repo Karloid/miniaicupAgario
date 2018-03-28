@@ -34,6 +34,15 @@ repositories {
     mavenCentral()
 }
 
+task deploy (dependsOn: shadowJar, type: Copy) {
+    from "./build/libs"
+    into "./"
+    include "*.jar"
+    rename { String fileName ->
+        "ms.jar"
+    }
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.json', name: 'json', version: '20180130'

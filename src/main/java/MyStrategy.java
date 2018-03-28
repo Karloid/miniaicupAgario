@@ -36,7 +36,7 @@ public class MyStrategy {
 
             simpleMove();
 
-            //potentialMove();
+            // potentialMove();
 
 
             long timeTaken = System.currentTimeMillis() - start;
