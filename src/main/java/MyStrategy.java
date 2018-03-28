@@ -21,6 +21,10 @@ public class MyStrategy {
     private MyStrategyPainter painter = new EmptyPaintner();
     private Random random;
 
+
+    private Point2D nextRandomPoint;
+    private int randomPointGeneratedTick = -99999;
+
     public void move(Player me, World world, Game game, Move move) {
         try {
             long start = System.currentTimeMillis();
@@ -60,13 +64,21 @@ public class MyStrategy {
     private void simpleMove() {
         List<Unit> targets = world.food;
         if (targets.isEmpty()) {
-            move.goTo(world.width / 2, world.height / 2);
+            if (world.tickIndex - randomPointGeneratedTick > 30) {
+                nextRandomPoint = getMapRandomPoint();
+                randomPointGeneratedTick = world.tickIndex;
+            }
+            move.goTo(nextRandomPoint);
             return;
         }
         Unit me = world.mines.get(0);
         Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
         move.goTo(max);
 
+    }
+
+    private Point2D getMapRandomPoint() {
+        return new Point2D(random.nextDouble() * game.GAME_WIDTH, random.nextDouble() * game.GAME_HEIGHT / 2);
     }
 
     private void potentialMove() {

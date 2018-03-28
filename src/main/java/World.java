@@ -10,8 +10,6 @@ import java.util.List;
 @SuppressWarnings("ForLoopWithMissingComponent")
 public class World {
     public int tickIndex;
-    public double width;
-    public double height;
 
     public List<Unit> food = new ArrayList<>(0);
     public List<Unit> ejections = new ArrayList<>(0);

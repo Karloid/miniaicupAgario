@@ -48,4 +48,9 @@ public class Move {
         x = xx;
         y = yy;
     }
+
+    public void goTo(Point2D point) {
+        x = point.getX();
+        y = point.getY();
+    }
 }
