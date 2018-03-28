@@ -45,7 +45,7 @@ public class Utils {
             queueToLog = new LinkedBlockingQueue<>();
             new Thread(() -> {
                 try {
-                    PrintWriter out = getPrintWriter();
+                 //   PrintWriter out = getPrintWriter();
                     PrintStream outStream = getPrintStream();
                     for (; ; ) {
                         String take = queueToLog.take();
@@ -69,7 +69,9 @@ public class Utils {
         if (logPrintWriter == null) {
             FileWriter fw = null;
             try {
-                fw = new FileWriter("/Users/fox/projects/miniaicup2/log.txt", true);
+                String filePath = "/Users/fox/projects/miniaicup2/log.txt";
+                new File(filePath).delete();
+                fw = new FileWriter(filePath, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -82,7 +84,9 @@ public class Utils {
     public static PrintStream getPrintStream() {
         if (logPrintStream == null) {
             try {
-                logPrintStream = new PrintStream(new FileOutputStream("/Users/fox/projects/miniaicup2/log.txt", true));
+                String filePath = "/Users/fox/projects/miniaicup2/log.txt";
+                new File(filePath).delete();
+                logPrintStream = new PrintStream(new FileOutputStream(filePath, true));
             } catch (IOException e) {
                 e.printStackTrace();
             }
