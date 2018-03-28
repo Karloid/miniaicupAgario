@@ -1,16 +1,15 @@
-import model.Vehicle;
 
-public class VehicleWrapper {
+public class UnitWrapper {
     public static final Point2D NOT_MOVING = new Point2D(0, 0);
     public boolean isEnemy;
     private Point2D moveVector;
-    public Vehicle v;
+    public Unit v;
     private final MyStrategy mys;
     public int hpChangedAt;
     public int movedAt;
     int hpDelta;
 
-    public VehicleWrapper(Vehicle v, MyStrategy mys) {
+    public UnitWrapper(Unit v, MyStrategy mys) {
         this.v = v;
         this.mys = mys;
         setUpdatedAt(mys.world.getTickIndex());
@@ -23,6 +22,7 @@ public class VehicleWrapper {
         movedAt = tickIndex;
     }
 
+/*
     public void update(Vehicle newVehicle) {
         int currentTick = mys.world.getTickIndex();
         if (v.getX() != newVehicle.getX() || v.getY() != newVehicle.getY()) {
@@ -37,22 +37,25 @@ public class VehicleWrapper {
 
         v = newVehicle;
 
-     /*   if (v.getId() == 10) {
+     */
+/*   if (v.getId() == 10) {
             mys.log("DEBUG my terrain " + getCurrentPlace() + " my type " + v.getType() + " x y " + (int) (getX() / 32) + " " + (int) (getY() / 32) );
-        }*/
-    }
+        }*//*
 
-    public double getDistanceTo(VehicleWrapper sec) {
+    }
+*/
+
+    public double getDistanceTo(UnitWrapper sec) {
         return Point2D.getDistance(v, sec.v);
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("VW{");
-        sb.append(", type=").append(v.getType());
-        sb.append(", hp=").append(v.getDurability());
-        sb.append(", XY=").append((int) v.getX()).append(" - ").append((int) v.getY());
-        sb.append(", moveVector=").append(moveVector);
+      // sb.append(", type=").append(v.getType());
+      // sb.append(", hp=").append(v.getDurability());
+      // sb.append(", XY=").append((int) v.getX()).append(" - ").append((int) v.getY());
+      // sb.append(", moveVector=").append(moveVector);
         sb.append(", hpChangedAt=").append(hpChangedAt);
         sb.append(", movedAt=").append(movedAt);
         sb.append('}');
@@ -73,11 +76,11 @@ public class VehicleWrapper {
         return v.getX() + mv.getX() * ticks;
     }
 
-    public double getDistanceToPredictTarget(VehicleWrapper target, int tick) {
+    public double getDistanceToPredictTarget(UnitWrapper target, int tick) {
         return Point2D.getDistance(getX(), getY(), target.getX(tick), target.getY(tick));
     }
 
-    public double getDistanceToPredictBoth(VehicleWrapper target, int tick) {
+    public double getDistanceToPredictBoth(UnitWrapper target, int tick) {
         return Point2D.getDistance(getX(tick), getY(tick), target.getX(tick), target.getY(tick));
     }
 
@@ -92,16 +95,7 @@ public class VehicleWrapper {
     public Point2D getMoveVector() {
         return movedAt == mys.world.getTickIndex() ? moveVector : NOT_MOVING;
     }
-
-    public double getActualVisionRange() {
-        double d = v.getVisionRange();
-
-        double k = getVisibleKoeff();
-
-        d *= k;
-
-        return d - .5;
-    }
+    
 
     public String getCurrentPlace() {
 /*

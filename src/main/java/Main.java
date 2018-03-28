@@ -1,4 +1,5 @@
 import java.io.BufferedInputStream;
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -14,8 +15,8 @@ public class Main {
     public static void main(String[] args) {
         if (isLocalRun) {
             System.setErr(Utils.getPrintStream());
-           // System.setOut(new PrintStream(new TeeOutputStream(Utils.getPrintStream(), System.out)));
-            Utils.appendToLogFile("Start " + new Date());
+            System.setOut(new PrintStream(new TeeOutputStream(Utils.getPrintStream(), System.out)));
+            Utils.log("Start " + new Date());
         }
 
         Player player = new Player();

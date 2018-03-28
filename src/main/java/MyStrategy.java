@@ -1,3 +1,6 @@
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 public class MyStrategy {
@@ -28,9 +31,11 @@ public class MyStrategy {
 
 
             doConstantPart();
-            //TODO do something with nuclear attacks
 
-            potentialMove();
+
+            simpleMove();
+
+            //potentialMove();
 
 
             long timeTaken = System.currentTimeMillis() - start;
@@ -49,6 +54,18 @@ public class MyStrategy {
                 throw new RuntimeException(e);
             }
         }
+
+    }
+
+    private void simpleMove() {
+        List<Unit> targets = world.food;
+        if (targets.isEmpty()) {
+            move.goTo(world.width / 2, world.height / 2);
+            return;
+        }
+        Unit me = world.mines.get(0);
+        Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+        move.goTo(max);
 
     }
 
@@ -84,8 +101,6 @@ public class MyStrategy {
     }
 
     public void log(String s) {
-        if (Main.isLocalRun) {
-            Utils.appendToLogFile((world == null ? "0" : world.tickIndex) + ": " + s);
-        }
+        Utils.log((world == null ? "0" : world.tickIndex) + ": " + s);
     }
 }

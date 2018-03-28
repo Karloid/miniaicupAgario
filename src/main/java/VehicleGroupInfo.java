@@ -1,19 +1,17 @@
-import model.VehicleType;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class VehicleGroupInfo {
     public long facilityId = -100;
 
-    final VehicleType vehicleType; //just testing
+    final Object vehicleType; //just testing
     private MyStrategy myStrategy;
     public int count;
     public Ownership ownership;
     public Point2D moveToPoint;
     public int moveToPointAt;
     public PointsInfo pointsInfo;
-    public List<VehicleWrapper> vehicles = new ArrayList<>();
+    public List<UnitWrapper> vehicles = new ArrayList<>();
     public int lastShrinkI;
     public int lastShrinkForGatherI;
     public boolean isScaled;
@@ -29,7 +27,7 @@ public class VehicleGroupInfo {
     public int shrinkCount;
     public boolean isScaledNuclear;
 
-    public VehicleGroupInfo(Ownership ownership, VehicleType vehicleType, MyStrategy myStrategy) {
+    public VehicleGroupInfo(Ownership ownership, Object vehicleType, MyStrategy myStrategy) {
         this.ownership = ownership;
         this.vehicleType = vehicleType;
         this.myStrategy = myStrategy;
@@ -57,33 +55,10 @@ public class VehicleGroupInfo {
         return pointsInfo != null && (pointsInfo.rect.getHeight() > 100 || pointsInfo.rect.getWidth() > 100);
     }
 
-    public List<VehicleWrapper> countWillBeFurtherThenBefore(Point2D moveVector, Point2D target) {
-        List<VehicleWrapper> o = new ArrayList<>();
+    public List<UnitWrapper> countWillBeFurtherThenBefore(Point2D moveVector, Point2D target) {
+        List<UnitWrapper> o = new ArrayList<>();
 
 
         return o;
-    }
-
-    public double getHpPercent() {
-        int sum = 0;
-        for (int i = 0; i < vehicles.size(); i++) {
-            VehicleWrapper vehicle = vehicles.get(i);
-            sum += vehicle.v.getDurability();
-        }
-        return sum;
-    }
-
-    public boolean isAeral() {
-        return vehicles.get(0).v.isAerial();
-    }
-
-    public Point2D getGoToFacilityPoint() {
-        Point2D centerPos = null;
-        //if (count > 50) {
-            centerPos = centerPos.add(16, 16);
-        /*} else {        //TOO FAR
-            centerPos = centerPos.add(32, 32);
-        }*/
-        return centerPos;
     }
 }

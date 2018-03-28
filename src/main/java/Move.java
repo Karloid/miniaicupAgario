@@ -21,7 +21,7 @@ public class Move {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("Debug", debug);
         jsonObject.put("X", x);
-        jsonObject.put("Y", x);
+        jsonObject.put("Y", y);
         if (split) {
             jsonObject.put("Split", split);
         }
@@ -37,5 +37,15 @@ public class Move {
             jsonObject.put("Sprite", sprite);
         }
         return jsonObject.toString();
+    }
+
+    public void goTo(Unit unit) {
+        x = unit.getX();
+        y = unit.getY();
+    }
+
+    public void goTo(double xx, double yy) {
+        x = xx;
+        y = yy;
     }
 }

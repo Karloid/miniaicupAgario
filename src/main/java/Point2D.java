@@ -1,5 +1,3 @@
-import model.Unit;
-
 public final class Point2D {
     private final double x;
     private final double y;
@@ -95,7 +93,7 @@ public final class Point2D {
         return new Point2D(toX - fromX, toY - fromY);
     }
 
-    public double getDistanceTo(VehicleWrapper myVehicle) {
+    public double getDistanceTo(UnitWrapper myVehicle) {
         return getDistanceTo(myVehicle.v);
     }
 

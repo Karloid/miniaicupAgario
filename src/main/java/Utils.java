@@ -37,7 +37,10 @@ public class Utils {
     }
 
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
-    public static void appendToLogFile(String s) {
+    public static void log(String s) {
+        if (!Main.isLocalRun) {
+             return;
+        }
         if (queueToLog == null) {
             queueToLog = new LinkedBlockingQueue<>();
             new Thread(() -> {

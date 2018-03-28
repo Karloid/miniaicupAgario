@@ -1,19 +1,15 @@
-import model.VehicleType;
-
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class UnitManager {
     private MyStrategy mys;
 
-    final Map<Long, VehicleWrapper> vehicleById = new HashMap<>();
-    private List<VehicleWrapper> deadVehicles = new ArrayList<>();
+    final Map<Long, UnitWrapper> vehicleById = new HashMap<>();
+    private List<UnitWrapper> deadVehicles = new ArrayList<>();
 
     TickStats myStats;
     TickStats enemyStats;
-    private List<VehicleWrapper> cachedMy;
-    private List<VehicleWrapper> cachedEnemy;
+    private List<UnitWrapper> cachedMy;
+    private List<UnitWrapper> cachedEnemy;
     public int maxMyHp;
 
 
@@ -37,7 +33,7 @@ public class UnitManager {
         initTickVehCalcStats();
 
 
-        maxMyHp = streamVehicles(Ownership.ALLY).max(Comparator.comparingInt(value -> value.v.getDurability())).map(vehicleWrapper -> vehicleWrapper.v.getDurability()).orElse(50);
+       // maxMyHp = streamVehicles(Ownership.ALLY).max(Comparator.comparingInt(value -> value.v.getDurability())).map(vehicleWrapper -> vehicleWrapper.v.getDurability()).orElse(50);
 
         if (myStats.isNonEmpty()) {
             mys.log("My stats: " + myStats);
@@ -49,14 +45,14 @@ public class UnitManager {
 
 
     private void initTickVehCalcStats() {
-        Collection<VehicleWrapper> allUnits = vehicleById.values();
+        Collection<UnitWrapper> allUnits = vehicleById.values();
 
-        for (Iterator<VehicleWrapper> iterator = allUnits.iterator(); iterator.hasNext(); ) {
-            VehicleWrapper u = iterator.next();
+        for (Iterator<UnitWrapper> iterator = allUnits.iterator(); iterator.hasNext(); ) {
+            UnitWrapper u = iterator.next();
             TickStats stats = u.isEnemy ? enemyStats : myStats;
 
             stats.remainingUnits++;
-            stats.remainingHp += u.v.getDurability();
+         //   stats.remainingHp += u.v.getDurability();
         }
     }
 
@@ -65,7 +61,7 @@ public class UnitManager {
         for (VehicleUpdate vehicleUpdate : mys.world.getVehicleUpdates()) {
             long vehicleId = vehicleUpdate.getId();
 
-            VehicleWrapper veh = vehicleById.get(vehicleId);
+            UnitWrapper veh = vehicleById.get(vehicleId);
             veh.update(new Vehicle(veh.v, vehicleUpdate));
             if (veh.hpDelta != 0) {
                 TickStats stats = veh.isEnemy ? enemyStats : myStats;
@@ -91,18 +87,19 @@ public class UnitManager {
     private void initTickNewVehicles() {
 /*
         for (Vehicle vehicle : mys.world.getNewVehicles()) {
-            VehicleWrapper mv = new VehicleWrapper(vehicle, mys);
+            UnitWrapper mv = new UnitWrapper(vehicle, mys);
             vehicleById.put(vehicle.getId(), mv);
         }
 */
     }
 
-    public VehicleWrapper get(long id) {
+    public UnitWrapper get(long id) {
         return vehicleById.get(id);
     }
 
-    Stream<VehicleWrapper> streamVehicles(Ownership ownership, VehicleType vehicleType) {
-        Stream<VehicleWrapper> stream = vehicleById.values().stream();
+/*
+    Stream<UnitWrapper> streamVehicles(Ownership ownership, VehicleType vehicleType) {
+        Stream<UnitWrapper> stream = vehicleById.values().stream();
 
         switch (ownership) {
             case ALLY:
@@ -126,14 +123,15 @@ public class UnitManager {
 
         return stream;
     }
+*/
 
-    Stream<VehicleWrapper> streamVehicles(Ownership ownership) {
+    /*Stream<UnitWrapper> streamVehicles(Ownership ownership) {
         return streamVehicles(ownership, null);
-    }
+    }*/
 
-    Stream<VehicleWrapper> streamVehicles() {
+    /*Stream<UnitWrapper> streamVehicles() {
         return streamVehicles(Ownership.ANY);
-    }
+    }*/
 
     public int getMinTimeWithoutUpdates(VehicleGroupInfo vehicleGroupInfo) {
         return vehicleGroupInfo.vehicles.stream()
@@ -143,7 +141,7 @@ public class UnitManager {
 
     public int getUnitCount(Ownership ownership) {
         int count = 0;
-        for (VehicleWrapper vw : vehicleById.values()) {
+        for (UnitWrapper vw : vehicleById.values()) {
             switch (ownership) {
                 case ANY:
                     count++;
