@@ -139,4 +139,12 @@ public class Unit {
     public Point2D getPos() {
         return new Point2D(x, y);
     }
+
+    public double getAngleTo(Unit enemy) {
+        return enemy.getPos().sub(getPos()).angle();
+    }
+
+    public double getSpeedAngle() {
+        return Math.atan2(speedY, speedX);
+    }
 }

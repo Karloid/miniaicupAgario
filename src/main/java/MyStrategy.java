@@ -59,7 +59,7 @@ public class MyStrategy {
     }
 
     private void simpleMove() {
-        Unit me = world.mines.get(0);
+        @SuppressWarnings("ConstantConditions") Unit me = world.mines.stream().max(Comparator.comparing(unit -> unit.mass)).get();
 
         Optional<Unit> closestBigEnemy = world.enemies.stream().filter(unit -> me.mass < unit.mass).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
 
@@ -77,6 +77,16 @@ public class MyStrategy {
             Unit enemy = min.get();
             log("Moving to enemy! ratio is " + Utils.format(me.mass / enemy.mass) + " " + enemy);
             move.goTo(enemy);
+
+            if ((me.mass * 0.5) / enemy.mass > 1.2 ) {
+                double angleToEnemy = me.getAngleTo(enemy);
+                double speedAngle = me.getSpeedAngle();
+                if (Math.abs(angleToEnemy - speedAngle) < 0.15) {
+                    log("Also split! angles is enemy" + Utils.format(angleToEnemy) + " speed " + Utils.format(speedAngle));
+                    move.setSplit(true);
+                }
+            }
+
             return;
         }
 

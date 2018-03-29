@@ -8,7 +8,7 @@ java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y 
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
 
 ﻿java -jar /Users/fox/projects/miniaicup2/ms5588.jar
-
+﻿java -jar /Users/fox/projects/miniaicup2/ms5866.jar
 
 * */
 public class Main {

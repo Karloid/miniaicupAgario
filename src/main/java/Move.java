@@ -53,4 +53,8 @@ public class Move {
         x = point.getX();
         y = point.getY();
     }
+
+    public void setSplit(boolean split) {
+        this.split = split;
+    }
 }
