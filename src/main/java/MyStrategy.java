@@ -78,7 +78,7 @@ public class MyStrategy {
             log("Moving to enemy! ratio is " + Utils.format(me.mass / enemy.mass) + " " + enemy);
             move.goTo(enemy);
 
-            if ((me.mass * 0.5) / enemy.mass > 1.2 ) {
+            if ((me.mass * 0.5) / enemy.mass > 1.2) {
                 double angleToEnemy = me.getAngleTo(enemy);
                 double speedAngle = me.getSpeedAngle();
                 if (Math.abs(angleToEnemy - speedAngle) < 0.15) {
@@ -92,18 +92,37 @@ public class MyStrategy {
 
         List<Unit> targets = new ArrayList<>(world.food);
         targets.addAll(world.ejections);
-        if (targets.isEmpty()) {
-            if (world.tickIndex - randomPointGeneratedTick > 30) {
-                nextRandomPoint = getMapRandomPoint();
-                randomPointGeneratedTick = world.tickIndex;
-            }
-            move.goTo(nextRandomPoint);
+
+        targets.removeIf(unit -> unit.getDistanceToClosestCorner(game) < me.radius);
+
+        if (me.mass > 600) {
+            move.setSplit(true);
+        }
+
+        int multiplyTargetAt = 10;
+        
+        if (!targets.isEmpty()) {
+            Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+            move.goTo(relativeMultiplyPoint(max.getPos(), multiplyTargetAt, me.getPos()));
             return;
         }
 
-        Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
-        move.goTo(max);
 
+        if (world.tickIndex - randomPointGeneratedTick > 30) {
+            nextRandomPoint = getMapRandomPoint();
+            randomPointGeneratedTick = world.tickIndex;
+        }
+        move.goTo(relativeMultiplyPoint(nextRandomPoint, multiplyTargetAt, me.getPos()));
+        return;
+
+
+    }
+
+    private Point2D relativeMultiplyPoint(Point2D target, int multiplyTargetAt, Point2D base) {
+        if (multiplyTargetAt == 1) {
+            return target;
+        }
+        return target.sub(base).mul(multiplyTargetAt).add(base);
     }
 
     private Point2D getMapRandomPoint() {

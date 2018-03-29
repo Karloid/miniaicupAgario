@@ -147,4 +147,16 @@ public class Unit {
     public double getSpeedAngle() {
         return Math.atan2(speedY, speedX);
     }
+
+    public double getDistanceToClosestCorner(Game game) {
+        int w = game.GAME_WIDTH;
+        int h = game.GAME_HEIGHT;
+
+        double result = getDistanceTo(0, 0);
+        result = Math.min(result, getDistanceTo(0, h));
+        result = Math.min(result, getDistanceTo(w, 0));
+        result = Math.min(result, getDistanceTo(w, h));
+
+        return result;
+    }
 }

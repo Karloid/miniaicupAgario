@@ -224,4 +224,7 @@ public class Point2D {
     }
 
 
+    public Point2D add(Point2D point) {
+        return add(point.x, point.y);
+    }
 }
