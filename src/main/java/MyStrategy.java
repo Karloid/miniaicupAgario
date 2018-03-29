@@ -61,6 +61,17 @@ public class MyStrategy {
     private void simpleMove() {
         Unit me = world.mines.get(0);
 
+        Optional<Unit> closestBigEnemy = world.enemies.stream().filter(unit -> me.mass < unit.mass).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+
+        if (closestBigEnemy.isPresent()) {
+            Unit enemy = closestBigEnemy.get();
+            Point2D myPos = me.getPos();
+            Point2D enemyPos = enemy.getPos();
+            move.goTo(myPos.sub(enemyPos.sub(myPos)));
+            log("! Moving from enemy! ratio is " + Utils.format(me.mass / enemy.mass) + " " + enemy);
+            return;
+        }
+
         Optional<Unit> min = world.enemies.stream().filter(unit -> me.mass / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
         if (min.isPresent()) {
             Unit enemy = min.get();

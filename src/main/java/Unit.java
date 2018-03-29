@@ -135,4 +135,8 @@ public class Unit {
         sb.append('}');
         return sb.toString();
     }
+
+    public Point2D getPos() {
+        return new Point2D(x, y);
+    }
 }

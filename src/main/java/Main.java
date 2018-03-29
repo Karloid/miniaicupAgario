@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.Scanner;
 
 /*
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/build/libs/miniaicup2-1.0-all.jar true
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/build/libs/miniaicup2-1.0-all.jar true
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
+
+﻿java -jar /Users/fox/projects/miniaicup2/ms5588.jar
 
 
 * */
@@ -45,7 +47,9 @@ public class Main {
                 System.out.println(move.toJson());
                 i++;
             } catch (Exception e) {
-                e.printStackTrace();
+                if (isLocalRun) {
+                    e.printStackTrace();
+                }
             }
         }
     }

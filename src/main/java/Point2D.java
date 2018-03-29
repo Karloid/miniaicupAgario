@@ -1,4 +1,4 @@
-public final class Point2D {
+public class Point2D {
     private final double x;
     private final double y;
     private double val;
