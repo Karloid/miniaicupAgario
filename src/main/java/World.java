@@ -17,10 +17,9 @@ public class World {
     public List<Unit> viruses = new ArrayList<>(0);
     public List<Unit> enemies = new ArrayList<>(0); //TODO groups
 
-    public World(String nextString) {
-        Utils.log("World: " + nextString);
+    public World(JSONObject jsonObject) {
+        Utils.log("World: " + jsonObject.toString());
 
-        JSONObject jsonObject = new JSONObject(nextString);
 
         JSONArray minesObjects = jsonObject.getJSONArray("Mine");
         for (int i = 0; i < minesObjects.length(); i++) {
@@ -55,10 +54,7 @@ public class World {
             }
         }
     }
-
-    public static World parse(String nextString) {
-        return new World(nextString);
-    }
+    
 
 
     public int getTickIndex() {

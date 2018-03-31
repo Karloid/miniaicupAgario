@@ -93,4 +93,10 @@ public class Utils {
         }
         return logPrintStream;
     }
+
+    public static void print(Exception e) {
+        if (Main.isLocalRun) {
+            e.printStackTrace();
+        }
+    }
 }

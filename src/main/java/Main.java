@@ -1,3 +1,5 @@
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.PrintStream;
 import java.util.Date;
@@ -9,10 +11,12 @@ java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y 
 
 ﻿java -jar /Users/fox/projects/miniaicup2/ms5588.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/ms5866.jar
+﻿java -jar /Users/fox/projects/miniaicup2/ms6480.jar
 
 * */
 public class Main {
     static boolean isLocalRun = false;
+    private static Scanner scanner;
 
     public static void main(String[] args) {
         if (args != null && args.length > 0) {
@@ -29,15 +33,14 @@ public class Main {
         MyStrategy myStrategy = new MyStrategy();
         int i = 0;
 
-        Scanner scanner = new Scanner(new BufferedInputStream(System.in));
-        Game game = Game.from(scanner.next());
+        scanner = new Scanner(new BufferedInputStream(System.in));
+        Game game = new Game(readJsonObject());
 
         for (; ; ) {
             try {
 
-                String nextString = scanner.next();
 
-                World world = World.parse(nextString);
+                World world = new World(readJsonObject());
                 world.tickIndex = i;
 
 
@@ -47,11 +50,23 @@ public class Main {
                 System.out.println(move.toJson());
                 i++;
             } catch (Exception e) {
-                if (isLocalRun) {
-                    e.printStackTrace();
-                }
+                Utils.print(e);
             }
         }
     }
 
+    private static JSONObject readJsonObject() {
+        String next = "";
+        for (; ; ) {
+            try {
+                next += scanner.next();
+
+                //noinspection UnnecessaryLocalVariable
+                JSONObject result = new JSONObject(next);
+                return result;
+            } catch (Exception e) {
+                Utils.print(e);
+            }
+        }
+    }
 }
