@@ -12,23 +12,23 @@ public class LibGdxPainter implements MyStrategyPainter {
         data = new LibGdxDataToPaint();
         
         for (Unit enemy : myStrategy.world.food) {
-            data.objs.add(new LibGdxObj(enemy, false));
+            data.objs.add(new LibGdxObj(enemy));
         }
 
         for (Unit mine : myStrategy.world.mines) {
-            data.objs.add(new LibGdxObj(mine, true));
+            data.objs.add(new LibGdxObj(mine));
         }
 
         for (Unit enemy : myStrategy.world.enemies) {
-            data.objs.add(new LibGdxObj(enemy, false));
+            data.objs.add(new LibGdxObj(enemy));
         }
 
         for (Unit enemy : myStrategy.world.viruses) {
-            data.objs.add(new LibGdxObj(enemy, false));
+            data.objs.add(new LibGdxObj(enemy));
         }
 
         for (Unit enemy : myStrategy.world.ejections) {
-            data.objs.add(new LibGdxObj(enemy, false));
+            data.objs.add(new LibGdxObj(enemy));
         }
 
     }

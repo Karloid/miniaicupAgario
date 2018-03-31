@@ -16,6 +16,10 @@ public class Unit {
     public double speedY;
     public int timeToFuse;
     public double mass;
+    public boolean isMy;
+
+
+    public World world;
 
     public static Unit parse(JSONObject obj) {
         Unit o = new Unit();
@@ -69,6 +73,7 @@ public class Unit {
         if (obj.has("TTF")) {
             o.timeToFuse = obj.getInt("TTF");
         }
+        o.isMy = true;
         return o;
     }
 
@@ -158,5 +163,24 @@ public class Unit {
         result = Math.min(result, getDistanceTo(w, h));
 
         return result;
+    }
+
+    public double getVisionDistance() {
+        if (type == UnitType.PLAYER) {
+            if (isMy && world.mines.size() > 1) {
+                return (float) (2.5 * radius * Math.sqrt(world.mines.size()));
+            }
+            return (float) (radius * 4);
+        }
+        return -1;
+    }
+
+    public Point2D getVisionCenter() {
+        double speedAngle = getSpeedAngle();
+        return new Point2D(LibGdxObj.VISION_SHIFT, 0).rotate(speedAngle).add(getPos());
+    }
+
+    public Point2D getSpeedVector() {
+        return new Point2D(speedX, speedY);
     }
 }

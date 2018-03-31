@@ -2,9 +2,8 @@ import com.badlogic.gdx.graphics.Color;
 
 public class LibGdxObj extends Unit {
     public static final int VISION_SHIFT = 10;
-    public boolean isMy;
 
-    public LibGdxObj(Unit other, boolean isMy) {
+    public LibGdxObj(Unit other) {
         this.radius = (float) other.radius;
         this.id = other.id;
         this.x = (float) other.x;
@@ -14,7 +13,12 @@ public class LibGdxObj extends Unit {
         this.speedY = other.speedY;
         this.timeToFuse = other.timeToFuse;
         this.mass = other.mass;
-        this.isMy = isMy;
+        this.isMy = other.isMy;
+        this.world = other.world;
+        onConstruct();
+    }
+
+    private void onConstruct() {
         switch (type) {
             case FOOD:
                 radius = 3;
@@ -67,19 +71,4 @@ public class LibGdxObj extends Unit {
         return type != UnitType.EJECTION && type != UnitType.VIRUS && type != UnitType.FOOD;
     }
 
-    public float getVisionDistance() {
-        if (type == UnitType.PLAYER) {
-            return (float) (radius * 4);
-        }
-        return -1;
-    }
-
-    public Point2D getVisionCenter() {
-        double speedAngle = getSpeedAngle();
-        return new Point2D(VISION_SHIFT, 0).rotate(speedAngle).add(getPos());
-    }
-
-    private Point2D getSpeedVector() {
-        return new Point2D(speedX, speedY);
-    }
 }

@@ -25,6 +25,7 @@ public class World {
         for (int i = 0; i < minesObjects.length(); i++) {
             JSONObject obj = minesObjects.getJSONObject(i);
             Unit unit = Unit.parseMine(obj);
+            unit.world = this;
             switch (unit.type) {
                 case PLAYER:
                     this.mines.add(unit);
@@ -38,6 +39,7 @@ public class World {
         for (int i = 0; i < objects.length(); i++) {
             JSONObject obj = objects.getJSONObject(i);
             Unit unit = Unit.parse(obj);
+            unit.world = this;
             switch (unit.type) {
                 case FOOD:
                     food.add(unit);

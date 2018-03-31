@@ -67,24 +67,31 @@ public class LibGdxShower implements ApplicationListener {
             shapes.setColor(obj.getColor());
             shapes.circle(obj.getFX(), obj.getFY(), obj.getFR());
             if (obj.type == UnitType.PLAYER) {
-                Point2D p = obj.getVisionCenter();
 
-                //speed vector
-                shapes.setColor(Color.CYAN);
-                shapes.line(obj.getFX(), obj.getFY(), p.getFX(), p.getFY());
+                Point2D speedPoint = obj.getSpeedVector().mul(50).add(obj.getPos());
 
-                float vision = obj.getVisionDistance();
+                if (obj.isMy) {
+                    //speed vector
+                    shapes.setColor(Color.CYAN);
+                    shapes.line(obj.getFX(), obj.getFY(), speedPoint.getFX(), speedPoint.getFY());
+                }
+                Point2D visionCenter = obj.getVisionCenter();
+              /*  if (true) {
+                    continue;
+                }*/
+
+                float vision = (float) obj.getVisionDistance();
+
                 if (vision > 0) {
 
-
-                    shapes.circle(p.getFX(), p.getFY(), 4);
+                    shapes.circle(visionCenter.getFX(), visionCenter.getFY(), 4);
 
 
                     shapes.end();
                     shapes.begin(ShapeRenderer.ShapeType.Line);
 
 
-                    shapes.circle(p.getFX(), p.getFY(), vision);
+                    shapes.circle(visionCenter.getFX(), visionCenter.getFY(), vision);
 
                     shapes.end();
                     shapes.begin(ShapeRenderer.ShapeType.Filled);
