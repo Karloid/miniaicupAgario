@@ -47,10 +47,11 @@ public class MyStrategy {
 
             doConstantPart();
 
-
-            potentialCalcer.move();
-
-            simpleMove();
+            if (world.mines.isEmpty()) {
+                move.goTo(1, 1);
+            } else {
+                potentialCalcer.move();
+            }
 
             long timeTaken = System.currentTimeMillis() - start;
             elapsed += timeTaken;
@@ -127,7 +128,7 @@ public class MyStrategy {
         if (me.mass > 600) {
             move.setSplit(true);
         }
-        
+
         // move.setEject(true);
 
 

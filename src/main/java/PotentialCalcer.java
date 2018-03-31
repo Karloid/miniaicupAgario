@@ -9,6 +9,7 @@ public class PotentialCalcer {
     private HashMap<Point2D, Integer> cornersPushers;
     private Map<Point2D, Integer> sidesPushers;
     public PotentialMap lastPotentialMap;
+    private Unit mainUnit;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -17,12 +18,13 @@ public class PotentialCalcer {
 
     public void move() {
 
+        mainUnit = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
         if (m.world.getTickIndex() % 5 == 0) {
             lastPotentialMap = calcMap();
             potentialMapCalcAt = m.world.getTickIndex();
         }
 
-        Unit mainUnit = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
+
         Point2D averagePoint = mainUnit.getPos();
 
         averagePoint = averagePoint.toPotential();
@@ -72,8 +74,16 @@ public class PotentialCalcer {
 
 
         Set<Map.Entry<Point2D, Integer>> food = getUnitsCount(true).get(UnitType.FOOD).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemies = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
 
         int yy = 10;
+
+
+        double range = plainArray.cellsWidth * 1.2;
+
+        addToArray(plainArray, food, range, 2.5f);
+        subFromArray(plainArray, enemies, mainUnit.getVisionDistance() * 2 / cellSize, 6.4f, -1);
+
         /*
         boolean ifvShouldHeal = shouldHeal(IFV);
         boolean tankShouldHeal = shouldHeal(TANK);
@@ -622,7 +632,7 @@ public class PotentialCalcer {
         }*/
 
         { //add negative to corners
-            int maxDistanceSquare = 8 * 8;
+            int maxDistanceSquare = 3 * 3;
 
             int distanceToFac = 6;
 
@@ -649,42 +659,8 @@ public class PotentialCalcer {
             }
             HashMap<Point2D, Integer> cornerPushersFiltered = new HashMap<>(cornersPushers);
             cornerPushersFiltered.keySet().removeIf(corner -> {
-                for (Point2D facPoint : allFacCounts.keySet()) {
-                    if (facPoint.squareDistance(corner) < maxDistanceSquare) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-
-            cornerPushersFiltered.keySet().removeIf(corner -> {
-                int distanceThreshold = 13 * 13;
-              /*  for (Point2D facPoint : getUnitsCount(true).get(ARRV).keySet()) {
-                    if (facPoint.squareDistance(corner) < distanceThreshold) {
-                        return true;
-                    }
-                }
-
-                for (Point2D facPoint : getUnitsCount(true).get(HELICOPTER).keySet()) {
-                    if (facPoint.squareDistance(corner) < distanceThreshold) {
-                        return true;
-                    }
-                }
-
-                for (Point2D facPoint : getUnitsCount(true).get(FIGHTER).keySet()) {
-                    if (facPoint.squareDistance(corner) < distanceThreshold) {
-                        return true;
-                    }
-                }
-
-                for (Point2D facPoint : getUnitsCount(true).get(TANK).keySet()) {
-                    if (facPoint.squareDistance(corner) < distanceThreshold) {
-                        return true;
-                    }
-                }
-                for (Point2D unit : getUnitsCount(true).get(IFV).keySet()) {
-                    if (unit.squareDistance(corner) < distanceThreshold) {
+           /*     for (Map.Entry<Point2D, Integer> facPoint : food) {
+                    if (facPoint.getKey().squareDistance(corner) < maxDistanceSquare) {
                         return true;
                     }
                 }*/
@@ -692,7 +668,14 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, cornerPushersFiltered.entrySet(), 3 * 4, 3, -1);
+            cornerPushersFiltered.keySet().removeIf(corner -> {
+                int distanceThreshold = 13 * 13;
+
+                return false;
+            });
+
+
+            subFromArray(plainArray, cornerPushersFiltered.entrySet(), 250 / cellSize, 2, -1);
 
             if (sidesPushers == null) {
                 sidesPushers = new HashMap<>();
@@ -708,8 +691,8 @@ public class PotentialCalcer {
             HashMap<Point2D, Integer> sidesPushersFiltered = new HashMap<>(sidesPushers);
 
             sidesPushersFiltered.keySet().removeIf(side -> {
-                for (Point2D facPoint : allFacCounts.keySet()) {
-                    if (facPoint.squareDistance(side) < maxDistanceSquare) {
+                for (Map.Entry<Point2D, Integer> facPoint : food) {
+                    if (facPoint.getKey().squareDistance(side) < maxDistanceSquare) {
                         return true;
                     }
                 }
@@ -717,7 +700,7 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, sidesPushersFiltered.entrySet(), 3 * 3, 1, -1);
+            subFromArray(plainArray, sidesPushersFiltered.entrySet(), 3 * 3, 1.1f, -1);
 
 
             //strict {
@@ -726,7 +709,7 @@ public class PotentialCalcer {
                 for (int y = 0; y < plainArray.cellsHeight; y++) {
 
                     if (x == 0 || y == 0 || x == plainArray.cellsWidth - 1 || y == plainArray.cellsHeight - 1) {
-                        plainArray.set(x, y, plainArray.get(x, y) - 30);
+                        plainArray.set(x, y, plainArray.get(x, y) - 20);
                     }
                 }
             }
@@ -766,8 +749,8 @@ public class PotentialCalcer {
         }
     }
 
-    private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double range, float factor, float minVal) {
-        double squareDelta = range * range;
+    private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double spreadRange, float factor, float minVal) {
+        double squareDelta = spreadRange * spreadRange;
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
@@ -781,6 +764,22 @@ public class PotentialCalcer {
                     if (value > 1) {
                         plainArray.set(x, y, plainArray.get(x, y) - value);
                     }
+                }
+            }
+        }
+    }
+
+    private void addToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange, float factor) {
+        double squareDelta = spreadRange * spreadRange; //1.4 - hypot
+        for (int x = 0; x < plainArray.cellsWidth; x++) {
+            for (int y = 0; y < plainArray.cellsHeight; y++) {
+
+                for (Map.Entry<Point2D, Integer> entry : counts) {
+                    float count;
+                    count = Math.max(100 - entry.getValue(), 1) * factor;
+
+                    double value = (1 - entry.getKey().squareDistance(x, y) / squareDelta) * count;
+                    plainArray.set(x, y, Math.max(plainArray.get(x, y), value));
                 }
             }
         }

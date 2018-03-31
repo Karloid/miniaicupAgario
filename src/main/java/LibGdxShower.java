@@ -18,6 +18,8 @@ public class LibGdxShower implements ApplicationListener {
         cfg.useGL30 = false;
         cfg.width = Main.game.GAME_WIDTH;
         cfg.height = Main.game.GAME_HEIGHT;
+        cfg.x = 1920;
+        cfg.y = -100;
 
         LibGdxShower shower = new LibGdxShower();
         new LwjglApplication(shower, cfg);
