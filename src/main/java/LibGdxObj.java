@@ -1,7 +1,6 @@
 import com.badlogic.gdx.graphics.Color;
 
 public class LibGdxObj extends Unit {
-    public static final int VISION_SHIFT = 10;
 
     public LibGdxObj(Unit other) {
         this.radius = (float) other.radius;

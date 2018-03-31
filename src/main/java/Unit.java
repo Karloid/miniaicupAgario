@@ -7,6 +7,7 @@ import static java.lang.StrictMath.hypot;
  */
 @SuppressWarnings({"AbstractClassWithoutAbstractMethods", "WeakerAccess"})
 public class Unit {
+    public static final int VISION_SHIFT = 10;
     public double radius;
     public String id;
     public double x;
@@ -177,7 +178,7 @@ public class Unit {
 
     public Point2D getVisionCenter() {
         double speedAngle = getSpeedAngle();
-        return new Point2D(LibGdxObj.VISION_SHIFT, 0).rotate(speedAngle).add(getPos());
+        return new Point2D(VISION_SHIFT, 0).rotate(speedAngle).add(getPos());
     }
 
     public Point2D getSpeedVector() {
