@@ -235,4 +235,13 @@ public class Point2D {
     public float getFY() {
         return (float) y;
     }
+
+    public Point2D rotate(double angle) {
+
+        float x1 = (float)(this.x * Math.cos(angle) - this.y * Math.sin(angle));
+
+        float y1 = (float)(this.x * Math.sin(angle) + this.y * Math.cos(angle)) ;
+
+        return new Point2D(x1, y1);
+    }
 }

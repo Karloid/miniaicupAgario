@@ -76,7 +76,7 @@ public class LibGdxObj extends Unit {
 
     public Point2D getVisionCenter() {
         double speedAngle = getSpeedAngle();
-        return new Point2D(VISION_SHIFT, 0).rotate(getSpeedVector()).add(getPos());
+        return new Point2D(VISION_SHIFT, 0).rotate(speedAngle).add(getPos());
     }
 
     private Point2D getSpeedVector() {

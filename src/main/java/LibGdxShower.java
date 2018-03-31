@@ -9,9 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LibGdxShower implements ApplicationListener {
 
     static {
@@ -30,7 +27,7 @@ public class LibGdxShower implements ApplicationListener {
     private SpriteBatch batch;
     private ShapeRenderer shapes;
     private BitmapFont font;
-    private List<LibGdxObj> libGdxObjs = new ArrayList<>();
+    private LibGdxDataToPaint libGdxObjs = new LibGdxDataToPaint();
     private OrthographicCamera camera;
 
 
@@ -59,14 +56,14 @@ public class LibGdxShower implements ApplicationListener {
 
     @Override
     public void render() {
-        List<LibGdxObj> objs = this.libGdxObjs;
+        LibGdxDataToPaint data = this.libGdxObjs;
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
         shapes.begin(ShapeRenderer.ShapeType.Filled);
 
-        for (LibGdxObj obj : objs) {
+        for (LibGdxObj obj : data.objs) {
             shapes.setColor(obj.getColor());
             shapes.circle(obj.getFX(), obj.getFY(), obj.getFR());
             if (obj.type == UnitType.PLAYER) {
@@ -99,7 +96,7 @@ public class LibGdxShower implements ApplicationListener {
         shapes.end();
 
         batch.begin();
-        for (LibGdxObj obj : objs) {
+        for (LibGdxObj obj : data.objs) {
             if (obj.wantPrintMass()) {
                 font.setColor(Color.BLACK);
                 font.draw(batch, Utils.format(obj.mass), obj.getFX() - 10, obj.getFY() - 5);
@@ -120,7 +117,8 @@ public class LibGdxShower implements ApplicationListener {
     public void resume() {
     }
 
-    public void setObjects(List<LibGdxObj> libGdxObjs) {
+    public void setObjects(LibGdxDataToPaint libGdxObjs) {
         this.libGdxObjs = libGdxObjs;
     }
+
 }

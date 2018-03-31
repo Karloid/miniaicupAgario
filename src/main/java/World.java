@@ -18,7 +18,7 @@ public class World {
     public List<Unit> enemies = new ArrayList<>(0); //TODO groups
 
     public World(JSONObject jsonObject) {
-        Utils.log("World: " + jsonObject.toString());
+       // Utils.log("World: " + jsonObject.toString());
 
 
         JSONArray minesObjects = jsonObject.getJSONArray("Mine");
