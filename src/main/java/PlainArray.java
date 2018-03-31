@@ -27,7 +27,7 @@ public class PlainArray {
         return array[y * cellsWidth + x];
     }
 
-    void add(int x, int y, int val) {
+    void add(int x, int y, double val) {
         if (!inBounds(x, y)) {
             return;
         }
