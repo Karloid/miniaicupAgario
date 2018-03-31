@@ -227,4 +227,12 @@ public class Point2D {
     public Point2D add(Point2D point) {
         return add(point.x, point.y);
     }
+
+    public float getFX() {
+        return (float) x;
+    }
+
+    public float getFY() {
+        return (float) y;
+    }
 }

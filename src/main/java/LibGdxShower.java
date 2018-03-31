@@ -16,6 +16,7 @@ public class LibGdxShower implements ApplicationListener {
 
     static {
         LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+        cfg.foregroundFPS = 60;
         cfg.title = "hello-world";
         cfg.useGL30 = false;
         cfg.width = Main.game.GAME_WIDTH;
@@ -66,16 +67,43 @@ public class LibGdxShower implements ApplicationListener {
         shapes.begin(ShapeRenderer.ShapeType.Filled);
 
         for (LibGdxObj obj : objs) {
-            shapes.setColor(Color.GREEN);
-            shapes.circle(obj.x, obj.y, obj.radius);
+            shapes.setColor(obj.getColor());
+            shapes.circle(obj.getFX(), obj.getFY(), obj.getFR());
+            if (obj.type == UnitType.PLAYER) {
+                Point2D p = obj.getVisionCenter();
+
+                //speed vector
+                shapes.setColor(Color.CYAN);
+                shapes.line(obj.getFX(), obj.getFY(), p.getFX(), p.getFY());
+
+                float vision = obj.getVisionDistance();
+                if (vision > 0) {
+
+
+                    shapes.circle(p.getFX(), p.getFY(), 4);
+
+
+                    shapes.end();
+                    shapes.begin(ShapeRenderer.ShapeType.Line);
+
+
+                    shapes.circle(p.getFX(), p.getFY(), vision);
+
+                    shapes.end();
+                    shapes.begin(ShapeRenderer.ShapeType.Filled);
+                }
+            }
+
         }
 
         shapes.end();
 
         batch.begin();
         for (LibGdxObj obj : objs) {
-            font.setColor(Color.BLACK);
-            font.draw(batch, Utils.format(obj.mass), obj.x - 10, obj.y - 5);
+            if (obj.wantPrintMass()) {
+                font.setColor(Color.BLACK);
+                font.draw(batch, Utils.format(obj.mass), obj.getFX() - 10, obj.getFY() - 5);
+            }
         }
         batch.end();
     }

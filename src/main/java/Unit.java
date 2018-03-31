@@ -7,20 +7,20 @@ import static java.lang.StrictMath.hypot;
  */
 @SuppressWarnings({"AbstractClassWithoutAbstractMethods", "WeakerAccess"})
 public class Unit {
-    public float radius;
+    public double radius;
     public String id;
-    public float x;
-    public float y;
+    public double x;
+    public double y;
     public UnitType type;
-    public float speedX;
-    public float speedY;
+    public double speedX;
+    public double speedY;
     public int timeToFuse;
     public double mass;
 
     public static Unit parse(JSONObject obj) {
         Unit o = new Unit();
-        o.x = obj.getFloat("X");
-        o.y = obj.getFloat("Y");
+        o.x = obj.getDouble("X");
+        o.y = obj.getDouble("Y");
         if (obj.has("T")) {
             String t = obj.getString("T");
             UnitType ttt;
@@ -55,7 +55,7 @@ public class Unit {
         }
 
         if (obj.has("R")) {
-            o.radius = obj.getFloat("R");
+            o.radius = obj.getDouble("R");
         }
 
         return o;

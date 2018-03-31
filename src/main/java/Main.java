@@ -30,21 +30,21 @@ public class Main {
         }
 
 
-
         scanner = new Scanner(new BufferedInputStream(System.in));
         game = new Game(readJsonObject());
 
-        try {
-            Class.forName("LibGdxShower");
-        } catch (ClassNotFoundException e) {
-            Utils.print(e);
+        if (isLocalRun) {
+            try {
+                Class.forName("LibGdxShower");
+            } catch (ClassNotFoundException e) {
+                Utils.print(e);
+            }
         }
 
         Player player = new Player();
 
         MyStrategy myStrategy = new MyStrategy();
         int i = 0;
-
 
 
         for (; ; ) {
