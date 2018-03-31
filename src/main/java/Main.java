@@ -50,7 +50,6 @@ public class Main {
         for (; ; ) {
             try {
 
-
                 World world = new World(readJsonObject());
                 world.tickIndex = i;
 
@@ -62,6 +61,9 @@ public class Main {
                 i++;
             } catch (Exception e) {
                 Utils.print(e);
+                if (Main.isLocalRun) {
+                    throw e;
+                }
             }
         }
     }

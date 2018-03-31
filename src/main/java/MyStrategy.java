@@ -22,6 +22,7 @@ public class MyStrategy {
 
     private Point2D nextRandomPoint;
     private int randomPointGeneratedTick = -99999;
+    private Unit lastFoodTarget;
 
     public MyStrategy() {
         if (activePainter != null) {
@@ -61,6 +62,7 @@ public class MyStrategy {
 
             painter.onEndTick();
         } catch (Throwable e) {
+            move.goTo(0, 0);
             e.printStackTrace(); // is bad
             if (Main.isLocalRun) {
                 throw new RuntimeException(e);
@@ -101,20 +103,36 @@ public class MyStrategy {
             return;
         }
 
+        //going to food
+
+        int multiplyTargetAt = 10;
+
         List<Unit> targets = new ArrayList<>(world.food);
         targets.addAll(world.ejections);
 
-        targets.removeIf(unit -> unit.getDistanceToClosestCorner(game) < me.radius);
+        targets.removeIf(unit -> unit.getDistanceToClosestCorner(game) < me.radius
+                || (unit.getDistanceTo(me) < me.radius && !unit.equalsPos(lastFoodTarget))
+                || (unit.getDistanceTo(me) < me.radius + 10 && unit.type == UnitType.EJECTION && !unit.equalsPos(lastFoodTarget)));
+
+        if (lastFoodTarget != null) {
+            for (Unit target : targets) {
+                if (lastFoodTarget.equalsPos(target)) {
+                    move.goTo(relativeMultiplyPoint(lastFoodTarget.getPos(), multiplyTargetAt, me.getPos()));
+                    return;
+                }
+            }
+        }
 
         if (me.mass > 600) {
             move.setSplit(true);
         }
+        
+        // move.setEject(true);
 
-        int multiplyTargetAt = 10;
 
         if (!targets.isEmpty()) {
-            Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
-            move.goTo(relativeMultiplyPoint(max.getPos(), multiplyTargetAt, me.getPos()));
+            lastFoodTarget = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+            move.goTo(relativeMultiplyPoint(lastFoodTarget.getPos(), multiplyTargetAt, me.getPos()));
             return;
         }
 

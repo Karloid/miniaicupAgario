@@ -26,7 +26,7 @@ public class Move {
             jsonObject.put("Split", split);
         }
 
-        if (split) {
+        if (eject) {
             jsonObject.put("Eject", eject);
         }
 
@@ -56,5 +56,9 @@ public class Move {
 
     public void setSplit(boolean split) {
         this.split = split;
+    }
+
+    public void setEject(boolean eject) {
+        this.eject = eject;
     }
 }

@@ -183,4 +183,11 @@ public class Unit {
     public Point2D getSpeedVector() {
         return new Point2D(speedX, speedY);
     }
+
+    public boolean equalsPos(Unit target) {
+        if (target == null) {
+            return false;
+        }
+        return (int) target.x == (int) x && (int) target.y == (int) y;
+    }
 }
