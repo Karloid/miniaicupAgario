@@ -1,0 +1,98 @@
+import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class LibGdxShower implements ApplicationListener {
+
+    static {
+        LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+        cfg.title = "hello-world";
+        cfg.useGL30 = false;
+        cfg.width = Main.game.GAME_WIDTH;
+        cfg.height = Main.game.GAME_HEIGHT;
+
+        LibGdxShower shower = new LibGdxShower();
+        new LwjglApplication(shower, cfg);
+        MyStrategy.activePainter = new LibGdxPainter(shower);
+    }
+
+    private SpriteBatch batch;
+    private ShapeRenderer shapes;
+    private BitmapFont font;
+    private List<LibGdxObj> libGdxObjs = new ArrayList<>();
+    private OrthographicCamera camera;
+
+
+    @Override
+    public void create() {
+        // Create a full-screen camera:
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+// Set it to an orthographic projection with "y down" (the first boolean parameter)
+        camera.setToOrtho(true, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.update();
+
+        batch = new SpriteBatch();
+        batch.setProjectionMatrix(camera.combined);
+        shapes = new ShapeRenderer();
+        shapes.setProjectionMatrix(camera.combined);
+        font = new BitmapFont(true);
+        font.setColor(Color.RED);
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        shapes.dispose();
+        font.dispose();
+    }
+
+    @Override
+    public void render() {
+        List<LibGdxObj> objs = this.libGdxObjs;
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (LibGdxObj obj : objs) {
+            shapes.setColor(Color.GREEN);
+            shapes.circle(obj.x, obj.y, obj.radius);
+        }
+
+        shapes.end();
+
+        batch.begin();
+        for (LibGdxObj obj : objs) {
+            font.setColor(Color.BLACK);
+            font.draw(batch, Utils.format(obj.mass), obj.x - 10, obj.y - 5);
+        }
+        batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    public void setObjects(List<LibGdxObj> libGdxObjs) {
+        this.libGdxObjs = libGdxObjs;
+    }
+}

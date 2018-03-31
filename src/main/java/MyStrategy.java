@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class MyStrategy {
+    public static MyStrategyPainter activePainter;
     private long elapsed;
     ;
     public Player me;
@@ -21,6 +22,16 @@ public class MyStrategy {
 
     private Point2D nextRandomPoint;
     private int randomPointGeneratedTick = -99999;
+
+    public MyStrategy() {
+        if (activePainter != null) {
+            painter = activePainter;
+            painter.setMYS(this);
+        } else {
+            painter = new EmptyPaintner();
+        }
+        activePainter = null;
+    }
 
     public void move(Player me, World world, Game game, Move move) {
         try {
@@ -100,7 +111,7 @@ public class MyStrategy {
         }
 
         int multiplyTargetAt = 10;
-        
+
         if (!targets.isEmpty()) {
             Unit max = Collections.min(targets, Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
             move.goTo(relativeMultiplyPoint(max.getPos(), multiplyTargetAt, me.getPos()));

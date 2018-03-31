@@ -17,6 +17,7 @@ java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y 
 public class Main {
     static boolean isLocalRun = false;
     private static Scanner scanner;
+    public static Game game;
 
     public static void main(String[] args) {
         if (args != null && args.length > 0) {
@@ -28,13 +29,23 @@ public class Main {
             Utils.log("Start " + new Date());
         }
 
+
+
+        scanner = new Scanner(new BufferedInputStream(System.in));
+        game = new Game(readJsonObject());
+
+        try {
+            Class.forName("LibGdxShower");
+        } catch (ClassNotFoundException e) {
+            Utils.print(e);
+        }
+
         Player player = new Player();
 
         MyStrategy myStrategy = new MyStrategy();
         int i = 0;
 
-        scanner = new Scanner(new BufferedInputStream(System.in));
-        Game game = new Game(readJsonObject());
+
 
         for (; ; ) {
             try {

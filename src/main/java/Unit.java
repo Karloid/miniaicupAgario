@@ -7,20 +7,20 @@ import static java.lang.StrictMath.hypot;
  */
 @SuppressWarnings({"AbstractClassWithoutAbstractMethods", "WeakerAccess"})
 public class Unit {
-    public double radius;
+    public float radius;
     public String id;
-    public double x;
-    public double y;
+    public float x;
+    public float y;
     public UnitType type;
-    public double speedX;
-    public double speedY;
+    public float speedX;
+    public float speedY;
     public int timeToFuse;
     public double mass;
 
     public static Unit parse(JSONObject obj) {
         Unit o = new Unit();
-        o.x = obj.getDouble("X");
-        o.y = obj.getDouble("Y");
+        o.x = obj.getFloat("X");
+        o.y = obj.getFloat("Y");
         if (obj.has("T")) {
             String t = obj.getString("T");
             UnitType ttt;
@@ -55,7 +55,7 @@ public class Unit {
         }
 
         if (obj.has("R")) {
-            o.radius = obj.getDouble("R");
+            o.radius = obj.getFloat("R");
         }
 
         return o;
@@ -64,8 +64,8 @@ public class Unit {
     public static Unit parseMine(JSONObject obj) {
         Unit o = parse(obj);
         o.type = UnitType.PLAYER;
-        o.speedX = obj.getDouble("SX");
-        o.speedY = obj.getDouble("SY");
+        o.speedX = obj.getFloat("SX");
+        o.speedY = obj.getFloat("SY");
         if (obj.has("TTF")) {
             o.timeToFuse = obj.getInt("TTF");
         }
