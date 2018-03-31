@@ -61,4 +61,12 @@ public class Move {
     public void setEject(boolean eject) {
         this.eject = eject;
     }
+
+    public float getFX() {
+        return (float) x;
+    }
+
+    public float getFY() {
+        return (float) y;
+    }
 }

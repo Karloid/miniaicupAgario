@@ -7,7 +7,7 @@ public class MyStrategy {
     public Player me;
     public World world;
     private Game game;
-    private Move move;
+    public Move move;
 
     private static int constantId;
 

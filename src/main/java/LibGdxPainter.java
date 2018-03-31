@@ -40,6 +40,7 @@ public class LibGdxPainter implements MyStrategyPainter {
 
     @Override
     public void onEndTick() {
+        data.move = myStrategy.move;
         shower.setObjects(data);
     }
 
