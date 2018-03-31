@@ -16,6 +16,7 @@ public class Utils {
                     summary -> new PointsInfo(summary));
 
     static final String LOG_MOVING = "MOVING";
+    public static String WARN = "WARN";
     private static LinkedBlockingQueue<String> queueToLog;
     private static volatile PrintWriter logPrintWriter;
     private static volatile PrintStream logPrintStream;

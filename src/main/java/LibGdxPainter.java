@@ -41,6 +41,8 @@ public class LibGdxPainter implements MyStrategyPainter {
     @Override
     public void onEndTick() {
         data.move = myStrategy.move;
+        data.potentialMap = myStrategy.potentialCalcer.lastPotentialMap;
+
         shower.setObjects(data);
     }
 

@@ -30,6 +30,8 @@ public class LibGdxShower implements ApplicationListener {
     private LibGdxDataToPaint libGdxObjs = new LibGdxDataToPaint();
     private OrthographicCamera camera;
 
+    private boolean didDrawPP; //TODO
+
 
     @Override
     public void create() {
@@ -60,6 +62,7 @@ public class LibGdxShower implements ApplicationListener {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        drawPP(data);
 
         shapes.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -101,10 +104,10 @@ public class LibGdxShower implements ApplicationListener {
                     shapes.begin(ShapeRenderer.ShapeType.Filled);
                 }
             }
-
         }
-
         shapes.end();
+
+
 
         batch.begin();
         for (LibGdxObj obj : data.objs) {
@@ -114,6 +117,68 @@ public class LibGdxShower implements ApplicationListener {
             }
         }
         batch.end();
+    }
+
+    private void drawPP(LibGdxDataToPaint data) {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        if (data.potentialMap != null) {
+            PlainArray plainArray = data.potentialMap.map;
+
+            didDrawPP = true;
+
+            int cellSize = data.potentialMap.cellSize;
+
+            int cellsX = Main.game.GAME_WIDTH / cellSize;
+            int cellsY = Main.game.GAME_HEIGHT / cellSize;
+
+            double max = plainArray.getMax();
+            double min = plainArray.getMin();
+            double delta = max - min;
+            if (delta == 0) {
+                delta = 1;
+            }
+
+            double root = root(delta, delta);
+
+            int maxDistance = 32;
+            double squareMaxDistance = Math.pow(cellSize * maxDistance, 2);
+
+
+            //  mys.log("start draw " + myGroup.vehicleType);
+            for (int x = 0; x < cellsX; x++) {
+                for (int y = 0; y < cellsY; y++) {
+                    double v = plainArray.get(x, y) - min;
+
+                    int alpha = (int) (((Math.pow(root, v)) / delta) * 220);
+                    //int alpha = (int) ((v / delta) * 220);
+                    if (alpha > 0) {
+                        int realX = x * cellSize;
+                        int realY = y * cellSize;
+                        int centerX = realX + cellSize / 2;
+                        int centerY = realY + cellSize / 2;
+
+                        /*if (RESTRICTED_PP_DRAW && myGroup.getAveragePoint().squareDistance(centerX, centerY) > squareMaxDistance) {
+                            continue; // too far for decide
+                        }*/
+                        //mys.log(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
+                        //System.out.print(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
+                        //    System.out.print((int) v + " ");
+                        shapes.setColor(new Color((133 / 255f), alpha / 255f, (255 - alpha) / 255f, (100 / 255f)));
+                        //shapes.setColor(Color.GOLD);
+                        shapes.rect(realX, realY, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+
+        shapes.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    public static double root(double num, double root) {
+        return Math.pow(Math.E, Math.log(num) / root);
     }
 
     @Override

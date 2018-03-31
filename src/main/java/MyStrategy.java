@@ -2,6 +2,7 @@ import java.util.*;
 
 public class MyStrategy {
     public static MyStrategyPainter activePainter;
+    public final PotentialCalcer potentialCalcer;
     private long elapsed;
     ;
     public Player me;
@@ -32,6 +33,7 @@ public class MyStrategy {
             painter = new EmptyPaintner();
         }
         activePainter = null;
+        potentialCalcer = new PotentialCalcer(this);
     }
 
     public void move(Player me, World world, Game game, Move move) {
@@ -46,10 +48,9 @@ public class MyStrategy {
             doConstantPart();
 
 
+            potentialCalcer.move();
+
             simpleMove();
-
-            // potentialMove();
-
 
             long timeTaken = System.currentTimeMillis() - start;
             elapsed += timeTaken;
@@ -156,11 +157,6 @@ public class MyStrategy {
 
     private Point2D getMapRandomPoint() {
         return new Point2D(random.nextDouble() * game.GAME_WIDTH, random.nextDouble() * game.GAME_HEIGHT / 2);
-    }
-
-    private void potentialMove() {
-        move.x = 10;
-        move.y = 10;
     }
 
     private void doConstantPart() {
