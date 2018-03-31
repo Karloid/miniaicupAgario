@@ -18,7 +18,7 @@ public class MyStrategy {
 
     UnitManager um = new UnitManager(this);
     private MyStrategyPainter painter = new EmptyPaintner();
-    private Random random;
+    public Random random;
 
 
     private Point2D nextRandomPoint;

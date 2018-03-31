@@ -10,6 +10,7 @@ public class PotentialCalcer {
     private Map<Point2D, Integer> sidesPushers;
     public PotentialMap lastPotentialMap;
     private Unit mainUnit;
+    private Set<Map.Entry<Point2D, Integer>> lastGuessFood;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -19,7 +20,15 @@ public class PotentialCalcer {
     public void move() {
 
         mainUnit = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
-        if (m.world.getTickIndex() % 5 == 0) {
+
+        myUnitsCount = null;
+        enemyUnitsCount = null;
+
+
+        Set<Map.Entry<Point2D, Integer>> enemies = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
+
+
+        if (m.world.getTickIndex() % 5 == 0 || (!enemies.isEmpty() && m.world.getTickIndex() % 3 == 0)) {
             lastPotentialMap = calcMap();
             potentialMapCalcAt = m.world.getTickIndex();
         }
@@ -33,7 +42,7 @@ public class PotentialCalcer {
         int myY = averagePoint.getIntY();
 
         Point2D bestChoice = null;
-        int half = 100;
+        int half = 20;
 
 
         for (int x = myX - half; x <= myX + half; x++) {
@@ -69,20 +78,55 @@ public class PotentialCalcer {
         PotentialMap potentialMap = new PotentialMap(cellSize);
         PlainArray plainArray = potentialMap.map;
 
-        myUnitsCount = null;
-        enemyUnitsCount = null;
-
-
         Set<Map.Entry<Point2D, Integer>> food = getUnitsCount(true).get(UnitType.FOOD).entrySet();
-        Set<Map.Entry<Point2D, Integer>> enemies = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemiesToScare = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemiesToEat = getUnitsCount(true).get(UnitType.ENEMIES_TO_EAT).entrySet();
+
+        double visionDistance = mainUnit.getVisionDistance();
+
+
+        { //food guessing
+            double tmp = visionDistance * 1.3;
+            float guessFoodSquareDist = (float) ((tmp / cellSize) * (tmp / cellSize));
+            float visionSquareDist = (float) ((visionDistance / cellSize) * (visionDistance / cellSize));
+
+            Point2D mainUnitPotentialPos = mainUnit.getPos().toPotential();
+
+            if (lastGuessFood != null) {
+                lastGuessFood.removeIf(entry -> entry.getKey().squareDistance(mainUnitPotentialPos) < visionSquareDist);
+            }
+
+            if (food.isEmpty()) {
+
+                if (lastGuessFood != null && !lastGuessFood.isEmpty()) {
+                    food = lastGuessFood;
+                } else {
+                    //potential food
+                    food = new HashSet<>(0);
+                    lastGuessFood = food;
+                    for (int i = 0; i < 50; i++) {
+                        double x = m.random.nextFloat() * plainArray.cellsWidth;
+                        double y = m.random.nextFloat() * plainArray.cellsHeight;
+
+                        if (mainUnitPotentialPos.squareDistance(x, y) > guessFoodSquareDist) {
+                            food.add(new AbstractMap.SimpleEntry<>(new Point2D(x, y), 1));
+                        }
+                    }
+                }
+            }
+        }
+
 
         int yy = 10;
 
 
         double range = plainArray.cellsWidth * 1.2;
 
-        addCumulToArray(plainArray, food, range, 2.5f, (int) (mainUnit.radius / cellSize));
-        subFromArray(plainArray, enemies, mainUnit.getVisionDistance() * 2 / cellSize, 6.4f, -1);
+        addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize));
+        addCumulToArray(plainArray, enemiesToEat, range, 10.5f, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize));
+
+
+        subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 15.4f, -1);
 
 
         { //add negative to corners
@@ -144,8 +188,9 @@ public class PotentialCalcer {
             }
             HashMap<Point2D, Integer> sidesPushersFiltered = new HashMap<>(sidesPushers);
 
+            Set<Map.Entry<Point2D, Integer>> finalFood = food;
             sidesPushersFiltered.keySet().removeIf(side -> {
-                for (Map.Entry<Point2D, Integer> facPoint : food) {
+                for (Map.Entry<Point2D, Integer> facPoint : finalFood) {
                     if (facPoint.getKey().squareDistance(side) < maxDistanceSquare) {
                         return true;
                     }
@@ -198,8 +243,22 @@ public class PotentialCalcer {
             Point2D key = unit.getPos().toPotential();
 
             Map<UnitType, Map<Point2D, Integer>> map = !unit.isMy ? enemyUnitsCount : myUnitsCount;
-            Map<Point2D, Integer> countMap = map.get(unit.type);
-            countMap.put(key, countMap.getOrDefault(key, 0) + 1);
+
+            boolean mustAdd = true;
+            if (unit.type == UnitType.PLAYER) {//special case
+                if (!unit.isMy && mainUnit.mass > unit.mass) {
+                    mustAdd = false;
+                    if (mainUnit.mass / unit.mass > 1.2) {
+                        Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_EAT);
+                        countMap.put(key, countMap.getOrDefault(key, 0) + 1);
+                    }
+                }
+            }
+
+            if (mustAdd) {
+                Map<Point2D, Integer> countMap = map.get(unit.type);
+                countMap.put(key, countMap.getOrDefault(key, 0) + 1);
+            }
         }
     }
 
@@ -214,7 +273,13 @@ public class PotentialCalcer {
                         continue;
                     }
                     val = val * factor;
-                    double value = (1 - entry.getKey().squareDistance(x, y) / squareDelta) * val;
+                    double squareDist = entry.getKey().squareDistance(x, y);
+
+                    if (squareDist > squareDelta) {
+                        continue;
+                    }
+
+                    double value = (1 - squareDist / squareDelta) * val;
                     if (value > 1) {
                         plainArray.set(x, y, plainArray.get(x, y) - value);
                     }
@@ -253,12 +318,17 @@ public class PotentialCalcer {
                     float count;
                     count = Math.max(100 - entry.getValue(), 1) * factor;
                     double squareDist = point.squareDistance(x, y);
+
+                    if (squareDelta < squareDist) {
+                        continue;
+                    }
+
                     double value = (1 - squareDist / squareDelta) * count;
 
                     double currentValue = plainArray.get(x, y);
                     if (squareDist <= squareCumulRange) {
                         //plainArray.add(x, y, (currentValue > 0 ? currentValue  * 0.1 : 0) + value);
-                     //   plainArray.set(x, y, Math.max(currentValue, value));
+                        //   plainArray.set(x, y, Math.max(currentValue, value));
                         plainArray.set(x, y, currentValue > 0 ? currentValue + 0.1f * count : count);
                     } else {
                         plainArray.set(x, y, Math.max(currentValue, value));

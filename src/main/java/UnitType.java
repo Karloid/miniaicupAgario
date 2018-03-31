@@ -3,5 +3,9 @@ public enum UnitType {
     PLAYER,
     EJECTION,
     VIRUS,
-    UNKNOWN;
+    //TRANSIENT
+    UNKNOWN,
+    ENEMIES_TO_EAT,
+    ;
+    //TODO transient types for potential move
 }
