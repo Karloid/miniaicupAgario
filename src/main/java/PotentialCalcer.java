@@ -59,7 +59,8 @@ public class PotentialCalcer {
                     continue;
                 }*/
 
-                currentChoice.setVal(lastPotentialMap.map.get(x, y));
+                //currentChoice.setVal(lastPotentialMap.map.get(x, y));
+                currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
                 if (bestChoice == null || bestChoice.getVal() < currentChoice.getVal()) {
                     //TODO check safety
                     bestChoice = currentChoice;
@@ -67,10 +68,10 @@ public class PotentialCalcer {
             }
         }
 
-        boolean noMove = bestChoice != null && !bestChoice.equals(new Point2D(myX, myY));
+        boolean correctMove = bestChoice != null && !bestChoice.equals(new Point2D(myX, myY));
 
 
-        if (bestChoice != null && noMove) {
+        if (bestChoice != null /*&& correctMove*/) {
             m.move.goTo(bestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
         } else {
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
@@ -86,14 +87,15 @@ public class PotentialCalcer {
         Set<Map.Entry<Point2D, Integer>> enemiesToEat = getUnitsCount(true).get(UnitType.ENEMIES_TO_EAT).entrySet();
 
         double visionDistance = mainUnit.getVisionDistance();
-
+        Point2D mainUnitPosPotential = mainUnit.getPos().toPotential();
+        double calcDistancePotential = (visionDistance * 1) / cellSize;
 
         { //food guessing
             double tmp = visionDistance * 1.3;
             float guessFoodSquareDist = (float) ((tmp / cellSize) * (tmp / cellSize));
             float visionSquareDist = (float) ((visionDistance / cellSize) * (visionDistance / cellSize));
 
-            Point2D mainUnitPotentialPos = mainUnit.getPos().toPotential();
+            Point2D mainUnitPotentialPos = mainUnitPosPotential;
 
             if (lastGuessFood != null) {
                 lastGuessFood.removeIf(entry -> entry.getKey().squareDistance(mainUnitPotentialPos) < visionSquareDist);
@@ -125,11 +127,14 @@ public class PotentialCalcer {
 
         double range = plainArray.cellsWidth * 1.2;
 
-        addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize));
-        addCumulToArray(plainArray, enemiesToEat, range, 10.5f, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize));
+        addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
+                mainUnitPosPotential, calcDistancePotential);
+
+        addCumulToArray(plainArray, enemiesToEat, range, 10.5f, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
+                mainUnitPosPotential, calcDistancePotential);
 
 
-        subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 15.4f, -1);
+        subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 15.4f, -1, mainUnitPosPotential, calcDistancePotential);
 
 
         { //add negative to corners
@@ -176,7 +181,7 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, cornerPushersFiltered.entrySet(), 250 / cellSize, 2, -1);
+            subFromArray(plainArray, cornerPushersFiltered.entrySet(), 250 / cellSize, 2, -1, mainUnitPosPotential, calcDistancePotential);
 
             if (sidesPushers == null) {
                 sidesPushers = new HashMap<>();
@@ -202,7 +207,7 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, sidesPushersFiltered.entrySet(), 3 * 3, 1.1f, -1);
+            subFromArray(plainArray, sidesPushersFiltered.entrySet(), 3 * 3, 1.1f, -1, mainUnitPosPotential, calcDistancePotential);
 
 
             //strict {
@@ -265,8 +270,12 @@ public class PotentialCalcer {
         }
     }
 
-    private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double spreadRange, float factor, float minVal) {
+    private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double spreadRange, float factor, float minVal,
+                              Point2D calcPoint, double calcRadius) {
         double squareDelta = spreadRange * spreadRange;
+
+        double squareCalcRadius = calcRadius * calcRadius;
+
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
@@ -275,6 +284,11 @@ public class PotentialCalcer {
                     if (val < minVal) {
                         continue;
                     }
+
+                    if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                        continue;
+                    }
+
                     val = val * factor;
                     double squareDist = entry.getKey().squareDistance(x, y);
 
@@ -307,10 +321,11 @@ public class PotentialCalcer {
         }
     }
 
-    private void addCumulToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange, float factor, int cumulRangle) {
+    private void addCumulToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
+                                 float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
         spreadRange -= cumulRangle;
         double squareDelta = spreadRange * spreadRange; //1.4 - hypot
-
+        double squareCalcRadius = calculateRadius * calculateRadius;
         //double visionDistance = mainUnit.getVisionDistance(); //TODO optimize max points to calculate
 
 
@@ -320,6 +335,11 @@ public class PotentialCalcer {
 
                 for (Map.Entry<Point2D, Integer> entry : counts) {
                     Point2D point = entry.getKey();
+
+
+                    if (calculationPoint.squareDistance(x, y) > squareCalcRadius) {
+                        continue;
+                    }
 
                     float count;
                     count = Math.max(100 - entry.getValue(), 1) * factor;
@@ -332,10 +352,11 @@ public class PotentialCalcer {
                     double value = (1 - squareDist / squareDelta) * count;
 
                     double currentValue = plainArray.get(x, y);
-                    if (squareDist <= squareCumulRange) {
+                    if (squareDist <= squareCumulRange/* && currentValue > count*/) {
                         //plainArray.add(x, y, (currentValue > 0 ? currentValue  * 0.1 : 0) + value);
                         //   plainArray.set(x, y, Math.max(currentValue, value));
-                        plainArray.set(x, y, currentValue > 0 ? currentValue + 0.1f * count : count);
+                        value *= 1.2f;
+                        plainArray.set(x, y, currentValue > value ? currentValue + 0.1f * value : value);
                     } else {
                         plainArray.set(x, y, Math.max(currentValue, value));
                     }
