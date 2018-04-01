@@ -2,6 +2,10 @@ import com.badlogic.gdx.graphics.Color;
 
 public class LibGdxObj extends Unit {
 
+    public static final Color MY_PLAYER_COLOR = new Color(0, 1, 0, 0.6f);
+    public static final Color ENEMY_PLAYER_COLOR = new Color(1, 0, 0, 0.6f);
+    public static final Color VIRUS_COLOR = new Color(0, 0, 0, 0.8f);
+
     public LibGdxObj(Unit other) {
         this.radius = (float) other.radius;
         this.id = other.id;
@@ -37,17 +41,17 @@ public class LibGdxObj extends Unit {
 
     public Color getColor() {
         if (isMy) {
-            return Color.GREEN;
+            return MY_PLAYER_COLOR;
         }
         switch (type) {
             case FOOD:
                 return Color.GRAY;
             case PLAYER:
-                return Color.RED;
+                return ENEMY_PLAYER_COLOR;
             case EJECTION:
                 return Color.BLUE;
             case VIRUS:
-                return Color.DARK_GRAY;
+                return VIRUS_COLOR;
             case UNKNOWN:
                 return Color.FIREBRICK;
         }

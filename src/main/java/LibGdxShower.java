@@ -64,6 +64,9 @@ public class LibGdxShower implements ApplicationListener {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         drawPP(data);
 
         shapes.begin(ShapeRenderer.ShapeType.Filled);
@@ -109,7 +112,7 @@ public class LibGdxShower implements ApplicationListener {
         }
         shapes.end();
 
-
+        Gdx.gl.glDisable(GL20.GL_BLEND);
 
         batch.begin();
         for (LibGdxObj obj : data.objs) {
@@ -119,11 +122,12 @@ public class LibGdxShower implements ApplicationListener {
             }
         }
         batch.end();
+
+
     }
 
     private void drawPP(LibGdxDataToPaint data) {
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         if (data.potentialMap != null) {
             PlainArray plainArray = data.potentialMap.map;
@@ -176,7 +180,7 @@ public class LibGdxShower implements ApplicationListener {
         }
 
         shapes.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+
     }
 
     public static double root(double num, double root) {

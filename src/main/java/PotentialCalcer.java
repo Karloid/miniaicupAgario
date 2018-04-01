@@ -13,6 +13,8 @@ public class PotentialCalcer {
     private Set<Map.Entry<Point2D, Integer>> lastGuessFood;
     private int lastFoodCount = -1;
 
+    private Point2D lastBestChoice;
+
 
     public PotentialCalcer(MyStrategy m) {
         this.m = m;
@@ -72,6 +74,13 @@ public class PotentialCalcer {
 
 
         if (bestChoice != null /*&& correctMove*/) {
+            if (lastBestChoice != null && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
+                    && lastBestChoice.getVal() / lastPotentialMap.map.get(lastBestChoice.getIntX(), lastBestChoice.getIntY()) < 1.3) {
+                m.move.goTo(lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
+                m.log(Utils.WARN + " GOING TO lastBestChoice");
+                return;
+            }
+            lastBestChoice = bestChoice;
             m.move.goTo(bestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
         } else {
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
@@ -207,15 +216,15 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, sidesPushersFiltered.entrySet(), 3 * 3, 1.1f, -1, mainUnitPosPotential, calcDistancePotential);
+            subFromArray(plainArray, sidesPushersFiltered.entrySet(), (mainUnit.radius * 2) / cellSize, 1.1f, -1, mainUnitPosPotential, calcDistancePotential);
 
 
             //strict {
-
+            int strictgap = (int) (mainUnit.radius / cellSize);
             for (int x = 0; x < plainArray.cellsWidth; x++) {
                 for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                    if (x == 0 || y == 0 || x == plainArray.cellsWidth - 1 || y == plainArray.cellsHeight - 1) {
+                    if (x < strictgap || y < strictgap || x >= plainArray.cellsWidth - strictgap || y >= plainArray.cellsHeight - strictgap) {
                         plainArray.set(x, y, plainArray.get(x, y) - 20);
                     }
                 }
@@ -356,6 +365,9 @@ public class PotentialCalcer {
                         //plainArray.add(x, y, (currentValue > 0 ? currentValue  * 0.1 : 0) + value);
                         //   plainArray.set(x, y, Math.max(currentValue, value));
                         value *= 1.2f;
+                        if (entry.getKey().getIntX() == x && entry.getKey().getIntY() == y) {
+                            value *= 1.05f;
+                        }
                         plainArray.set(x, y, currentValue > value ? currentValue + 0.1f * value : value);
                     } else {
                         plainArray.set(x, y, Math.max(currentValue, value));
