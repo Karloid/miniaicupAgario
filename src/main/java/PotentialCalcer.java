@@ -14,6 +14,7 @@ public class PotentialCalcer {
     private int lastFoodCount = -1;
 
     private Point2D lastBestChoice;
+    private int lastBestChoiceCellSize;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -23,6 +24,8 @@ public class PotentialCalcer {
     public void move() {
 
         mainUnit = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
+
+        cellSize = (int) (mainUnit.radius / 2);
 
         myUnitsCount = null;
         enemyUnitsCount = null;
@@ -74,13 +77,14 @@ public class PotentialCalcer {
 
 
         if (bestChoice != null /*&& correctMove*/) {
-            if (lastBestChoice != null && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
+            if (lastBestChoice != null && cellSize == lastBestChoiceCellSize && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
                     && lastBestChoice.getVal() / lastPotentialMap.map.get(lastBestChoice.getIntX(), lastBestChoice.getIntY()) < 1.3) {
                 m.move.goTo(lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
                 m.log(Utils.WARN + " GOING TO lastBestChoice");
                 return;
             }
             lastBestChoice = bestChoice;
+            lastBestChoiceCellSize = cellSize;
             m.move.goTo(bestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
         } else {
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
@@ -220,7 +224,7 @@ public class PotentialCalcer {
 
 
             //strict {
-            int strictgap = (int) (mainUnit.radius / cellSize);
+            int strictgap = (int) (mainUnit.radius / cellSize) + 1;
             for (int x = 0; x < plainArray.cellsWidth; x++) {
                 for (int y = 0; y < plainArray.cellsHeight; y++) {
 
@@ -351,7 +355,7 @@ public class PotentialCalcer {
                     }
 
                     float count;
-                    count = Math.max(100 - entry.getValue(), 1) * factor;
+                    count = Math.max(99 + entry.getValue(), 1) * factor;
                     double squareDist = point.squareDistance(x, y);
 
                     if (squareDelta < squareDist) {
