@@ -11,6 +11,7 @@ public class PotentialCalcer {
     public PotentialMap lastPotentialMap;
     private Unit mainUnit;
     private Set<Map.Entry<Point2D, Integer>> lastGuessFood;
+    private int lastGuessFoodCellSize;
     private int lastFoodCount = -1;
 
     private Point2D lastBestChoice;
@@ -22,6 +23,9 @@ public class PotentialCalcer {
     }
 
     public void move() {
+        //TODO check guessed food
+        //TODO fear pleyers more
+        //TODO fear players which can split on you
 
         mainUnit = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
 
@@ -78,7 +82,9 @@ public class PotentialCalcer {
 
         if (bestChoice != null /*&& correctMove*/) {
             if (lastBestChoice != null && cellSize == lastBestChoiceCellSize && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
-                    && lastBestChoice.getVal() / lastPotentialMap.map.get(lastBestChoice.getIntX(), lastBestChoice.getIntY()) < 1.3) {
+                    && lastBestChoice.getVal() / lastPotentialMap.map.get(lastBestChoice.getIntX(), lastBestChoice.getIntY()) < 1.3
+                    && lastBestChoice.getVal() / bestChoice.getVal() > 0.9
+                    ) {
                 applyMove(lastBestChoice);
                 m.log(Utils.WARN + " GOING TO lastBestChoice");
                 return;
@@ -94,7 +100,7 @@ public class PotentialCalcer {
     private void applyMove(Point2D lastBestChoice) {
         Point2D realPoint = lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2);
         //m.move.goTo(realPoint);
-        m.move.goTo(m.relativeMultiplyPoint(realPoint, 4, mainUnit.getPos()));
+        m.move.goTo(m.relativeMultiplyPoint(realPoint, 1, mainUnit.getPos()));
     }
 
     private PotentialMap calcMap() { //TODO improve logic at final stages
@@ -116,6 +122,10 @@ public class PotentialCalcer {
 
             Point2D mainUnitPotentialPos = mainUnitPosPotential;
 
+            if (cellSize != lastGuessFoodCellSize) {   //guess food in real coordinates
+                lastGuessFood = null;
+            }
+
             if (lastGuessFood != null) {
                 lastGuessFood.removeIf(entry -> entry.getKey().squareDistance(mainUnitPotentialPos) < visionSquareDist);
             }
@@ -128,6 +138,7 @@ public class PotentialCalcer {
                     //potential food
                     food = new HashSet<>(0);
                     lastGuessFood = food;
+                    lastGuessFoodCellSize = cellSize;
                     for (int i = 0; i < 50; i++) {
                         double x = m.random.nextFloat() * plainArray.cellsWidth;
                         double y = m.random.nextFloat() * plainArray.cellsHeight;
