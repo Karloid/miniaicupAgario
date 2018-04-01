@@ -108,7 +108,7 @@ public class PotentialCalcer {
         PlainArray plainArray = potentialMap.map;
 
         Set<Map.Entry<Point2D, Integer>> food = getUnitsCount(true).get(UnitType.FOOD).entrySet();
-        Set<Map.Entry<Point2D, Integer>> enemiesToScare = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemiesToScare = getUnitsCount(true).get(UnitType.ENEMIES_TO_SCARE).entrySet();
         Set<Map.Entry<Point2D, Integer>> enemiesToEat = getUnitsCount(true).get(UnitType.ENEMIES_TO_EAT).entrySet();
 
         double visionDistance = mainUnit.getVisionDistance();
@@ -164,7 +164,7 @@ public class PotentialCalcer {
                 mainUnitPosPotential, calcDistancePotential);
 
 
-        subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 15.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
 
 
         { //add negative to corners
@@ -290,6 +290,10 @@ public class PotentialCalcer {
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_EAT);
                         countMap.put(key, countMap.getOrDefault(key, 0) + 1);
                     }
+                } else if (!unit.isMy && mainUnit.mass <= unit.mass) {
+                    mustAdd = false;
+                    Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_SCARE);
+                    countMap.put(key, countMap.getOrDefault(key, 0) + 1);
                 }
             }
 
