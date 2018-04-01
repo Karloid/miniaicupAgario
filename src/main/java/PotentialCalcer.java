@@ -11,6 +11,7 @@ public class PotentialCalcer {
     public PotentialMap lastPotentialMap;
     private Unit mainUnit;
     private Set<Map.Entry<Point2D, Integer>> lastGuessFood;
+    private int lastFoodCount = -1;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -27,11 +28,13 @@ public class PotentialCalcer {
 
         Set<Map.Entry<Point2D, Integer>> enemies = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
 
+        int currentFoodCount = m.world.food.size();
 
-        if (m.world.getTickIndex() % 5 == 0 || (!enemies.isEmpty() && m.world.getTickIndex() % 3 == 0)) {
+        if (currentFoodCount != lastFoodCount || m.world.getTickIndex() % 15 == 0 || (!enemies.isEmpty() && m.world.getTickIndex() % 4 == 0)) {
             lastPotentialMap = calcMap();
             potentialMapCalcAt = m.world.getTickIndex();
         }
+        lastFoodCount = currentFoodCount;
 
 
         Point2D averagePoint = mainUnit.getPos();
