@@ -9,7 +9,7 @@ import java.util.Scanner;
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
 
-﻿java -jar /Users/fox/projects/miniaicup2/ms6703.jar
+﻿java -jar /Users/fox/projects/miniaicup2/ms6706.jar
 
 ﻿java -jar /Users/fox/projects/miniaicup2/ms6545.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/ms5588.jar
