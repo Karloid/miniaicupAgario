@@ -311,6 +311,9 @@ public class PotentialCalcer {
         spreadRange -= cumulRangle;
         double squareDelta = spreadRange * spreadRange; //1.4 - hypot
 
+        //double visionDistance = mainUnit.getVisionDistance(); //TODO optimize max points to calculate
+
+
         double squareCumulRange = cumulRangle * cumulRangle;
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
