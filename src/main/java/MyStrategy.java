@@ -51,6 +51,8 @@ public class MyStrategy {
                 move.goTo(1, 1);
             } else {
                 potentialCalcer.move();
+
+                fireAtenemy();
             }
 
             long timeTaken = System.currentTimeMillis() - start;
@@ -71,6 +73,27 @@ public class MyStrategy {
             }
         }
 
+    }
+
+    private boolean fireAtenemy() {
+        Unit me = Collections.max(world.mines, Comparator.comparingDouble(value -> value.mass));
+        Optional<Unit> closestEnemy = world.enemies.stream().filter(unit -> me.mass / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+        if (closestEnemy.isPresent()) {
+            Unit enemy = closestEnemy.get();
+            log("Moving to enemy! ratio is " + Utils.format(me.mass / enemy.mass) + " " + enemy);
+
+            if ((me.mass * 0.5) / enemy.mass > 1.2) {
+                double angleToEnemy = me.getAngleTo(enemy);
+                double speedAngle = me.getSpeedAngle();
+                if (Math.abs(angleToEnemy - speedAngle) < 0.15 && me.getDistanceTo(enemy) < me.getRadius() * 3) {
+                    log("Also split! angles is enemy" + Utils.format(angleToEnemy) + " speed " + Utils.format(speedAngle));
+                    move.setSplit(true);
+                }
+            }
+
+            return true;
+        }
+        return false;
     }
 
     private void simpleMove() {
@@ -149,7 +172,7 @@ public class MyStrategy {
 
     }
 
-    private Point2D relativeMultiplyPoint(Point2D target, int multiplyTargetAt, Point2D base) {
+    public Point2D relativeMultiplyPoint(Point2D target, int multiplyTargetAt, Point2D base) {
         if (multiplyTargetAt == 1) {
             return target;
         }

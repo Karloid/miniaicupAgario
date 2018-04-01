@@ -79,16 +79,22 @@ public class PotentialCalcer {
         if (bestChoice != null /*&& correctMove*/) {
             if (lastBestChoice != null && cellSize == lastBestChoiceCellSize && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
                     && lastBestChoice.getVal() / lastPotentialMap.map.get(lastBestChoice.getIntX(), lastBestChoice.getIntY()) < 1.3) {
-                m.move.goTo(lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
+                applyMove(lastBestChoice);
                 m.log(Utils.WARN + " GOING TO lastBestChoice");
                 return;
             }
             lastBestChoice = bestChoice;
             lastBestChoiceCellSize = cellSize;
-            m.move.goTo(bestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2));
+            applyMove(bestChoice);
         } else {
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
         }
+    }
+
+    private void applyMove(Point2D lastBestChoice) {
+        Point2D realPoint = lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2);
+        //m.move.goTo(realPoint);
+        m.move.goTo(m.relativeMultiplyPoint(realPoint, 4, mainUnit.getPos()));
     }
 
     private PotentialMap calcMap() { //TODO improve logic at final stages
@@ -229,7 +235,7 @@ public class PotentialCalcer {
                 for (int y = 0; y < plainArray.cellsHeight; y++) {
 
                     if (x < strictgap || y < strictgap || x >= plainArray.cellsWidth - strictgap || y >= plainArray.cellsHeight - strictgap) {
-                        plainArray.set(x, y, plainArray.get(x, y) - 20);
+                        plainArray.set(x, y, plainArray.get(x, y) - 40);
                     }
                 }
             }
