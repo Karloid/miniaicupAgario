@@ -62,17 +62,14 @@ public class PotentialCalcer {
         Point2D bestChoice = null;
         int half = (int) lastPotentialMap.calcDistancePotential;
 
+        double squareCalcRadius = lastPotentialMap.calcDistancePotential * lastPotentialMap.calcDistancePotential;
 
         for (int x = myX - half; x <= myX + half; x++) {
             for (int y = myY - half; y <= myY + half; y++) {
                 Point2D currentChoice = new Point2D(x, y);
-                if (Math.ceil(currentChoice.getDistanceTo(myX, myY)) > half + 0.01) {
+                if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius) {
                     continue;
                 }
-
-         /*       if (y == myY && x == myX && myGroup.noMoveCount > 10) {
-                    continue;
-                }*/
 
                 currentChoice.setVal(lastPotentialMap.map.get(x, y));
                 // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
