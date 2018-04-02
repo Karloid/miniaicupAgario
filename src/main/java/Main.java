@@ -82,11 +82,15 @@ public class Main {
                 next += scanner.next();
 
                 //noinspection UnnecessaryLocalVariable
-                JSONObject result = new JSONObject(next);
+                JSONObject result = parseJson(next);
                 return result;
             } catch (Exception e) {
                 Utils.print(e);
             }
         }
+    }
+
+    private static JSONObject parseJson(String next) {
+        return new JSONObject(next);
     }
 }
