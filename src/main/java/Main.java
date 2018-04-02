@@ -1,6 +1,7 @@
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.Scanner;
@@ -25,6 +26,7 @@ public class Main {
     static boolean isLocalRun = false;
     private static Scanner scanner;
     public static Game game;
+    private static BufferedReader in;
 
     public static void main(String[] args) {
         if (args != null && args.length > 0) {
@@ -36,8 +38,8 @@ public class Main {
             Utils.log("Start " + new Date());
         }
 
-
-        scanner = new Scanner(new BufferedInputStream(System.in));
+        in = new BufferedReader(new InputStreamReader(System.in));
+        //scanner = new Scanner(new BufferedInputStream(System.in));
         game = new Game(readJsonObject());
 
         if (isLocalRun) {
@@ -79,7 +81,7 @@ public class Main {
         String next = "";
         for (; ; ) {
             try {
-                next += scanner.next();
+                next += in.readLine();
 
                 //noinspection UnnecessaryLocalVariable
                 JSONObject result = parseJson(next);
