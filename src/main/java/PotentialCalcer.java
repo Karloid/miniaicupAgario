@@ -167,7 +167,7 @@ public class PotentialCalcer {
         }
 
 
-        addCumulToArray(plainArray, enemiesToEat, range, 10.5f, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
+        addCumulToArray(plainArray, enemiesToEat, range, enemiesToScare.isEmpty() ? 10.5f : 1, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
                 mainUnitPosPotential, calcDistancePotential);
 
 
@@ -218,7 +218,7 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, cornerPushersFiltered.entrySet(), 250 / cellSize, 2, -1, mainUnitPosPotential, calcDistancePotential);
+            subFromArray(plainArray, cornerPushersFiltered.entrySet(), (Main.game.GAME_WIDTH * 0.35) / cellSize, 4, -1, mainUnitPosPotential, calcDistancePotential);
 
             if (sidesPushers == null) {
                 sidesPushers = new HashMap<>();
