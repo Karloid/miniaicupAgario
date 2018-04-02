@@ -80,11 +80,11 @@ public class LibGdxShower implements ApplicationListener {
 
                 if (obj.isMy) {
                     //speed vector
-                    shapes.setColor(Color.CYAN);
+                    shapes.setColor(Color.GREEN);
                     shapes.line(obj.getFX(), obj.getFY(), speedPoint.getFX(), speedPoint.getFY());
 
                     //move vector
-                    shapes.setColor(Color.BLUE);
+                    shapes.setColor(Color.CYAN);
                     shapes.line(obj.getFX(), obj.getFY(), data.move.getFX(), data.move.getFY());
                 }
                 Point2D visionCenter = obj.getVisionCenter();

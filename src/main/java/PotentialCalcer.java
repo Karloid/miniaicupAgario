@@ -316,6 +316,11 @@ public class PotentialCalcer {
 
     private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double spreadRange, float factor, float minVal,
                               Point2D calcPoint, double calcRadius) {
+
+        if (unitsCount.isEmpty()) {
+            return;
+        }
+        
         double squareDelta = spreadRange * spreadRange;
 
         double squareCalcRadius = calcRadius * calcRadius;
@@ -367,6 +372,10 @@ public class PotentialCalcer {
 
     private void addCumulToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
                                  float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
+        if (counts.isEmpty()) {
+            return;
+        }
+
         spreadRange -= cumulRangle;
         double squareDelta = spreadRange * spreadRange; //1.4 - hypot
         double squareCalcRadius = calculateRadius * calculateRadius;
