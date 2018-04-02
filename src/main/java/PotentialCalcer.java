@@ -84,7 +84,7 @@ public class PotentialCalcer {
 
 
         if (bestChoice != null /*&& correctMove*/) {
-            if (lastBestChoice != null && cellSize == lastBestChoiceCellSize && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
+            if (false && lastBestChoice != null && cellSize == lastBestChoiceCellSize && !lastBestChoice.equals(bestChoice) && !lastBestChoice.equals(new Point2D(myX, myY))
                     && lastBestChoice.getVal() / lastPotentialMap.map.get(lastBestChoice.getIntX(), lastBestChoice.getIntY()) < 1.3
                     && lastBestChoice.getVal() / bestChoice.getVal() > 0.9
                     ) {
@@ -120,7 +120,11 @@ public class PotentialCalcer {
         Point2D mainUnitPosPotential = mainUnit.getPos().toPotential();
         double calcDistancePotential = (visionDistance * 1) / cellSize;
 
-        if (enemiesToEat.isEmpty() && enemiesToScare.isEmpty()) { //food guessing
+
+        double range = plainArray.cellsWidth * 1.2;
+
+
+        if (enemiesToEat.isEmpty() && enemiesToScare.isEmpty()) { //food guessing/calcing
             double tmp = visionDistance * 1.3;
             float guessFoodSquareDist = (float) ((tmp / cellSize) * (tmp / cellSize));
             float visionSquareDist = (float) ((visionDistance / cellSize) * (visionDistance / cellSize));
@@ -154,16 +158,11 @@ public class PotentialCalcer {
                     }
                 }
             }
+
+            addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
+                    mainUnitPosPotential, calcDistancePotential);
         }
 
-
-        int yy = 10;
-
-
-        double range = plainArray.cellsWidth * 1.2;
-
-        addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
-                mainUnitPosPotential, calcDistancePotential);
 
         addCumulToArray(plainArray, enemiesToEat, range, 10.5f, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
                 mainUnitPosPotential, calcDistancePotential);
