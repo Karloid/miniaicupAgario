@@ -17,6 +17,8 @@ public class PotentialCalcer {
     private Point2D lastBestChoice;
     private int lastBestChoiceCellSize;
 
+    private int lastCalcMapTick;
+
 
     public PotentialCalcer(MyStrategy m) {
         this.m = m;
@@ -35,11 +37,12 @@ public class PotentialCalcer {
         enemyUnitsCount = null;
 
 
-        Set<Map.Entry<Point2D, Integer>> enemies = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemiesToScare = getUnitsCount(true).get(UnitType.ENEMIES_TO_SCARE).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemiesToEat = getUnitsCount(true).get(UnitType.ENEMIES_TO_EAT).entrySet();
 
         int currentFoodCount = m.world.food.size();
 
-        if (currentFoodCount != lastFoodCount || m.world.getTickIndex() % 15 == 0 || (!enemies.isEmpty() && m.world.getTickIndex() % 4 == 0)) {
+        if (currentFoodCount != lastFoodCount || m.world.getTickIndex() % 15 == 0 || !enemiesToScare.isEmpty() || !enemiesToEat.isEmpty()) {
             lastPotentialMap = calcMap();
             potentialMapCalcAt = m.world.getTickIndex();
         }
@@ -104,6 +107,8 @@ public class PotentialCalcer {
     }
 
     private PotentialMap calcMap() { //TODO improve logic at final stages
+        m.log("calcMap, ticks without cacl: " + (m.world.tickIndex - lastCalcMapTick));
+        lastCalcMapTick = m.world.tickIndex;
         PotentialMap potentialMap = new PotentialMap(cellSize);
         PlainArray plainArray = potentialMap.map;
 
@@ -115,7 +120,7 @@ public class PotentialCalcer {
         Point2D mainUnitPosPotential = mainUnit.getPos().toPotential();
         double calcDistancePotential = (visionDistance * 1) / cellSize;
 
-        { //food guessing
+        if (enemiesToEat.isEmpty() && enemiesToScare.isEmpty()) { //food guessing
             double tmp = visionDistance * 1.3;
             float guessFoodSquareDist = (float) ((tmp / cellSize) * (tmp / cellSize));
             float visionSquareDist = (float) ((visionDistance / cellSize) * (visionDistance / cellSize));
