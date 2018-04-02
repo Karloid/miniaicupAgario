@@ -247,7 +247,7 @@ public class PotentialCalcer {
             });
 
 
-            subFromArray(plainArray, sidesPushersFiltered.entrySet(), (mainUnit.radius * 2) / cellSize, 1.1f, -1, mainUnitPosPotential, calcDistancePotential);
+            //subFromArray(plainArray, sidesPushersFiltered.entrySet(), (mainUnit.radius * 2) / cellSize, 1.1f, -1, mainUnitPosPotential, calcDistancePotential);
 
 
             //strict {
@@ -256,7 +256,22 @@ public class PotentialCalcer {
                 for (int y = 0; y < plainArray.cellsHeight; y++) {
 
                     if (x < strictgap || y < strictgap || x >= plainArray.cellsWidth - strictgap || y >= plainArray.cellsHeight - strictgap) {
-                        plainArray.set(x, y, plainArray.get(x, y) - 40);
+                        double extra = 0;
+                        if (x < strictgap) {
+                            extra = 40 * (strictgap - x);
+                        }
+                        if (y < strictgap) {
+                            extra = 40 * (strictgap - y);
+                        }
+                        if (x >= plainArray.cellsWidth - strictgap) {
+                            extra = 40 * (strictgap - (plainArray.cellsWidth - x));
+                        }
+                        if (y >= plainArray.cellsHeight - strictgap) {
+                            extra = 40 * (strictgap - (plainArray.cellsHeight - y));
+                        }
+
+                        plainArray.set(x, y, plainArray.get(x, y) - 40 - extra);
+
                     }
                 }
             }
@@ -320,7 +335,7 @@ public class PotentialCalcer {
         if (unitsCount.isEmpty()) {
             return;
         }
-        
+
         double squareDelta = spreadRange * spreadRange;
 
         double squareCalcRadius = calcRadius * calcRadius;
