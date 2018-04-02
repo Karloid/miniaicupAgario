@@ -14,7 +14,10 @@ public class Move {
     public boolean eject;
 
     public String spriteId;
-    public String spireDebug;
+    public String spriteDebug;
+
+
+    public Point2D wantedTargetPos;
 
 
     public String toJson() {
@@ -33,7 +36,7 @@ public class Move {
         if (spriteId != null) {
             JSONObject sprite = new JSONObject();
             sprite.put("Id", spriteId);
-            sprite.put("S", spireDebug);
+            sprite.put("S", spriteDebug);
             jsonObject.put("Sprite", sprite);
         }
         return jsonObject.toString();

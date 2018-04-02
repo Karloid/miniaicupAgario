@@ -101,12 +101,48 @@ public class PotentialCalcer {
     }
 
     private void applyMove(Point2D lastBestChoice) {
-        Point2D realPoint = lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2);
-        //m.move.goTo(realPoint);
-        m.move.goTo(m.relativeMultiplyPoint(realPoint, 1, mainUnit.getPos()));
+        Point2D targetPos = lastBestChoice.mul(cellSize).add(cellSize / 2, cellSize / 2);
+        m.move.wantedTargetPos = targetPos;
+        boolean normal = false;
+        if (normal) {
+
+            m.move.goTo(m.relativeMultiplyPoint(targetPos, 1, mainUnit.getPos()));
+        } else {
+
+            double speedAngle = mainUnit.getSpeedAngle();
+            Point2D speedVector = mainUnit.getSpeedVector();
+            Point2D targetVector = targetPos.sub(mainUnit.getPos());
+            double targetAngle = targetVector.angle();
+
+            double meanVector = targetVector.add(speedVector).div(2).angle();
+
+
+            double delta = Math.abs(targetAngle - speedAngle);
+
+            m.log("speedAngle: " + Utils.format(speedAngle) + " targetAngle: " + Utils.format(targetAngle) +
+                    " speedV: " + speedVector + " targetV " + targetVector + " delta: " + Utils.format(delta));
+
+            //delta = Math.min(delta,Math.PI / 2 )
+            if (delta <= (Math.PI / 2)) {
+                Point2D target = new Point2D(targetVector.length(), 0);
+                if (targetAngle > speedAngle) {
+                    target = target.rotate(delta + targetAngle);
+                } else {
+                    target = target.rotate(-delta + targetAngle);
+                }
+
+                m.move.goTo(mainUnit.getPos().add(target));
+            } else {
+                m.move.goTo(targetPos);
+            }
+        }
     }
 
     private PotentialMap calcMap() { //TODO improve logic at final stages
+
+        //TODO predictions
+        //TODO calc angles
+
         m.log("calcMap, ticks without cacl: " + (m.world.tickIndex - lastCalcMapTick));
         lastCalcMapTick = m.world.tickIndex;
         PotentialMap potentialMap = new PotentialMap(cellSize);

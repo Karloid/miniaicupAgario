@@ -10,6 +10,7 @@ import java.util.Scanner;
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/ms.jar true
 
+﻿java -jar /Users/fox/projects/miniaicup2/7450.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/7439.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/7430.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/7412.jar
