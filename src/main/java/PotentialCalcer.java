@@ -53,11 +53,14 @@ public class PotentialCalcer {
 
         averagePoint = averagePoint.toPotential();
 
-        int myX = averagePoint.getIntX();
-        int myY = averagePoint.getIntY();
+        //  int myX = averagePoint.getIntX();
+        //  int myY = averagePoint.getIntY();
+
+        int myX = lastPotentialMap.mainUnitPosPotential.getIntX();
+        int myY = lastPotentialMap.mainUnitPosPotential.getIntY();
 
         Point2D bestChoice = null;
-        int half = 20;
+        int half = (int) lastPotentialMap.calcDistancePotential;
 
 
         for (int x = myX - half; x <= myX + half; x++) {
@@ -71,8 +74,8 @@ public class PotentialCalcer {
                     continue;
                 }*/
 
-                //currentChoice.setVal(lastPotentialMap.map.get(x, y));
-                currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
+                currentChoice.setVal(lastPotentialMap.map.get(x, y));
+                // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
                 if (bestChoice == null || bestChoice.getVal() < currentChoice.getVal()) {
                     //TODO check safety
                     bestChoice = currentChoice;
@@ -120,6 +123,9 @@ public class PotentialCalcer {
         Point2D mainUnitPosPotential = mainUnit.getPos().toPotential();
         double calcDistancePotential = (visionDistance * 1) / cellSize;
 
+        potentialMap.calcDistancePotential = calcDistancePotential;
+        potentialMap.mainUnitPosPotential = mainUnitPosPotential;
+
 
         double range = plainArray.cellsWidth * 1.2;
 
@@ -148,7 +154,7 @@ public class PotentialCalcer {
                     food = new HashSet<>(0);
                     lastGuessFood = food;
                     lastGuessFoodCellSize = cellSize;
-                    for (int i = 0; i < 50; i++) {
+                    for (int i = 0; i < 30; i++) {
                         double x = m.random.nextFloat() * plainArray.cellsWidth;
                         double y = m.random.nextFloat() * plainArray.cellsHeight;
 

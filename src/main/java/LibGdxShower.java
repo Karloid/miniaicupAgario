@@ -177,6 +177,23 @@ public class LibGdxShower implements ApplicationListener {
                     }
                 }
             }
+
+            Point2D calcCenter = data.potentialMap.mainUnitPosPotential;
+            float realCalcDistance = (float) data.potentialMap.calcDistancePotential * cellSize;
+            float realX = (float) calcCenter.getX() * cellSize;
+            float realY = (float) calcCenter.getY() * cellSize;
+
+            shapes.setColor(Color.GOLD);
+            shapes.circle(realX, realY, (cellSize / 2));
+
+            shapes.end();
+            shapes.begin(ShapeRenderer.ShapeType.Line);
+
+
+            shapes.circle(realX, realY, realCalcDistance);
+
+            shapes.end();
+            shapes.begin(ShapeRenderer.ShapeType.Filled);
         }
 
         shapes.end();
