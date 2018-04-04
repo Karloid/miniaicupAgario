@@ -100,4 +100,16 @@ public class Utils {
             e.printStackTrace();
         }
     }
+
+    public static double normalizeAngle(double angle) {
+        return Math.atan2(Math.sin(angle), Math.cos(angle));
+    }
+
+    public static double normalizeAngleFast(double a, double center) {
+        return a - (Math.PI * 2) * Math.floor((a + Math.PI - center) / (Math.PI * 2));
+    }
+
+    public static double mod(double a, double n) {
+        return a - Math.floor(a/n) * n;
+    }
 }

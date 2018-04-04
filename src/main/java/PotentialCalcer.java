@@ -42,7 +42,11 @@ public class PotentialCalcer {
 
         int currentFoodCount = m.world.food.size();
 
-        if (currentFoodCount != lastFoodCount || m.world.getTickIndex() % 15 == 0 || !enemiesToScare.isEmpty() || !enemiesToEat.isEmpty()) {
+        if (currentFoodCount != lastFoodCount
+                || m.world.getTickIndex() % 15 == 0
+                || !enemiesToScare.isEmpty()
+                || !enemiesToEat.isEmpty()
+                || mainUnit.getPos().toPotential().getDistanceTo(lastPotentialMap.mainUnitPosPotential) > lastPotentialMap.calcDistancePotential / 2) {
             lastPotentialMap = calcMap();
             potentialMapCalcAt = m.world.getTickIndex();
         }
@@ -187,7 +191,7 @@ public class PotentialCalcer {
                     food = new HashSet<>(0);
                     lastGuessFood = food;
                     lastGuessFoodCellSize = cellSize;
-                    for (int i = 0; i < 30; i++) {
+                    for (int i = 0; i < 0; i++) {
                         double x = m.random.nextFloat() * plainArray.cellsWidth;
                         double y = m.random.nextFloat() * plainArray.cellsHeight;
 
@@ -206,6 +210,8 @@ public class PotentialCalcer {
         addCumulToArray(plainArray, enemiesToEat, range, enemiesToScare.isEmpty() ? 10.5f : 1, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
                 mainUnitPosPotential, calcDistancePotential);
 
+
+        addAnglePositive(plainArray, mainUnitPosPotential, calcDistancePotential);
 
         subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
 
@@ -314,6 +320,32 @@ public class PotentialCalcer {
         return potentialMap;
     }
 
+    private void addAnglePositive(PlainArray plainArray, Point2D calcPoint, double calculateRadius) {
+        double squareCalcRadius = calculateRadius * calculateRadius;
+        //double visionDistance = mainUnit.getVisionDistance(); //TODO optimize max points to calculate
+
+        double speedAngle = mainUnit.getSpeedAngle();
+
+        for (int x = 0; x < plainArray.cellsWidth; x++) {
+            for (int y = 0; y < plainArray.cellsHeight; y++) {
+
+                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
+
+                double pointAngle = new Point2D(x, y).sub(calcPoint).angle();
+
+                double delta = pointAngle - speedAngle;
+                delta = Utils.mod((delta + Math.PI),(Math.PI * 2)) - Math.PI;
+
+                delta = Math.abs(delta);
+                //    double delta = Math.abs(pointAngle - speedAngle);
+
+                plainArray.set(x, y, plainArray.get(x, y) + 30 * (1 - delta / Math.PI));
+            }
+        }
+    }
+
     private Map<UnitType, Map<Point2D, Integer>> getUnitsCount(boolean enemy) {
         if (enemyUnitsCount == null) {
             enemyUnitsCount = new HashMap<>();
@@ -376,15 +408,16 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
+                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
+
                 for (Map.Entry<Point2D, Integer> entry : unitsCount) {
                     float val = entry.getValue();
                     if (val < minVal) {
                         continue;
                     }
 
-                    if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                        continue;
-                    }
 
                     val = val * factor;
                     double squareDist = entry.getKey().squareDistance(x, y);
@@ -434,13 +467,13 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
+                if (calculationPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
+
                 for (Map.Entry<Point2D, Integer> entry : counts) {
                     Point2D point = entry.getKey();
 
-
-                    if (calculationPoint.squareDistance(x, y) > squareCalcRadius) {
-                        continue;
-                    }
 
                     float count;
                     count = Math.max(99 + entry.getValue(), 1) * factor;
