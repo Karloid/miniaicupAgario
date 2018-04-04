@@ -53,6 +53,10 @@ public class PotentialCalcer {
         lastFoodCount = currentFoodCount;
 
 
+        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 500) {
+            m.move.setSplit(true);
+        }
+
         Point2D averagePoint = mainUnit.getPos();
 
         averagePoint = averagePoint.toPotential();
@@ -146,6 +150,7 @@ public class PotentialCalcer {
 
         //TODO predictions
         //TODO calc angles
+        //TODO remember enemies
 
         m.log("calcMap, ticks without cacl: " + (m.world.tickIndex - lastCalcMapTick));
         lastCalcMapTick = m.world.tickIndex;
@@ -332,7 +337,7 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-               if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
                     continue;
                 }
 
@@ -361,7 +366,8 @@ public class PotentialCalcer {
                     continue;
                 }
 
-                double pointAngle = new Point2D(x, y).sub(calcPoint).angle();
+                Point2D vectorToPoint = new Point2D(x, y).sub(calcPoint);
+                double pointAngle = vectorToPoint.angle();
 
                 double delta = pointAngle - speedAngle;
                 delta = Utils.mod((delta + Math.PI), (Math.PI * 2)) - Math.PI;
@@ -369,7 +375,13 @@ public class PotentialCalcer {
                 delta = Math.abs(delta);
                 //    double delta = Math.abs(pointAngle - speedAngle);
 
-                plainArray.set(x, y, plainArray.get(x, y) + 30 * (1 - delta / Math.PI));
+                double addition = 30 * (1 - delta / Math.PI);
+
+                double vectorLength = vectorToPoint.length();
+                if (vectorLength <= 3) {
+                    addition *= 0.75;
+                }
+                plainArray.set(x, y, plainArray.get(x, y) + addition);
             }
         }
     }
