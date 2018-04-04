@@ -24,6 +24,8 @@ public class MyStrategy {
     private Point2D nextRandomPoint;
     private int randomPointGeneratedTick = -99999;
     private Unit lastFoodTarget;
+    
+    private World prevWorld;
 
     public MyStrategy() {
         if (activePainter != null) {
@@ -43,7 +45,7 @@ public class MyStrategy {
             initializeStrategy(world, game);
             log("move start");
             painter.onStartTick();
-
+             //TODO remember enemies positions
 
             doConstantPart();
 
@@ -188,6 +190,7 @@ public class MyStrategy {
     }
 
     private void initializeTick(Player me, World world, Game game, Move move) {
+        prevWorld = this.world;
         this.me = me;
         //this.opponent = world.getOpponentPlayer();
         this.world = world;
