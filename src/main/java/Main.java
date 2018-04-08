@@ -1,8 +1,6 @@
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -36,6 +34,7 @@ public class Main {
     private static Scanner scanner;
     public static Game game;
     private static BufferedReader in;
+    private static boolean isRepeater;
 
     public static void main(String[] args) {
         if (args != null && args.length > 0) {
@@ -48,6 +47,20 @@ public class Main {
         }
 
         in = new BufferedReader(new InputStreamReader(System.in));
+
+        isRepeater = isLocalRun && args.length >= 2;
+
+        if (isRepeater) {
+            FileReader fr = null;
+            try {
+                fr = new FileReader(args[1]);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            in = new BufferedReader(fr);
+        }
+
         //scanner = new Scanner(new BufferedInputStream(System.in));
         game = new Game(readJsonObject());
 
@@ -88,12 +101,22 @@ public class Main {
 
     private static JSONObject readJsonObject() {
         String next = "";
+        String tmp = null;
         for (; ; ) {
             try {
-                next += in.readLine();
+
+                tmp = in.readLine();
+                if (tmp == null || (isLocalRun && (tmp.startsWith("T") || tmp.isEmpty()))) {
+                    continue;
+                }
+                next += tmp;
 
                 //noinspection UnnecessaryLocalVariable
                 JSONObject result = parseJson(next);
+                if (isLocalRun && !result.has("Mine") && !result.has("GAME_WIDTH")) {
+                    next = "";
+                    continue;
+                }
                 return result;
             } catch (Exception e) {
                 Utils.print(e);
