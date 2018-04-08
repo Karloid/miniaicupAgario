@@ -152,6 +152,7 @@ public class PotentialCalcer {
         //TODO predictions
         //TODO calc angles
         //TODO remember enemies
+        //TODO shadows
 
         m.log("calcMap, ticks without cacl: " + (m.world.tickIndex - lastCalcMapTick));
         lastCalcMapTick = m.world.tickIndex;
@@ -438,9 +439,12 @@ public class PotentialCalcer {
     }
 
     private boolean isSafeForMyUnits(Unit enemy) {
-        double minDistanceToEnemy = mainUnit.getDistanceTo(enemy) * 1.2;
-        long count = m.world.mines.stream().filter(unit -> enemy.mass / unit.mass > 1.1 && enemy.getDistanceTo(unit) < minDistanceToEnemy).count();
-        return count == 0;
+        Optional<Unit> closesteater = m.world.mines.stream().filter(unit -> unit.mass / enemy.mass > 1.2)
+                .min(Comparator.comparingDouble(unit -> unit.getDistanceTo(enemy)));
+
+        double minDistance = closesteater.map(unit -> unit.getDistanceTo(enemy) + unit.radius * 0.5).orElseGet(() -> Main.game.GAME_HEIGHT * 2d);
+        long canEatMyUnits = m.world.mines.stream().filter(unit -> enemy.mass / unit.mass > 1.1 && enemy.getDistanceTo(unit) < minDistance).count();
+        return canEatMyUnits == 0;
     }
 
     private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double spreadRange, float factor, float minVal,
