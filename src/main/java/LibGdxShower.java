@@ -33,6 +33,7 @@ public class LibGdxShower implements ApplicationListener {
     private OrthographicCamera camera;
 
     private boolean didDrawPP; //TODO
+    private boolean resized;
 
 
     @Override
@@ -127,7 +128,10 @@ public class LibGdxShower implements ApplicationListener {
         }
         batch.end();
 
-
+        if (!resized) {
+            resized = true;
+            Gdx.graphics.setWindowedMode(700, 700);
+        }
     }
 
     private void drawPP(LibGdxDataToPaint data) {
