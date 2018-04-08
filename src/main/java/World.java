@@ -1,8 +1,7 @@
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Этот класс описывает игровой мир. Содержит также описания всех игроков, игровых объектов (<<юнитов>>) и сооружений.
@@ -95,8 +94,21 @@ public class World {
     }
 
     private void simulateTick(Unit enemy) {
+        double currentSpeed = enemy.getSpeedVector().length();
+        double maxSpeed = Main.game.SPEED_FACTOR / Math.sqrt(enemy.mass);
+        Optional<Unit> target = getBestTarget(enemy); //TODO best target for enemy
+        if (target.isPresent()) {
+            Unit targetReal = target.get();
+            Point2D newDir = targetReal.getPos().sub(enemy.getPos());
+            double newLength = newDir.length();
+            double ratio = maxSpeed / newLength;
+            newDir = newDir.mul(ratio);
+            enemy.setSpeedVector(newDir);
+        }
+
         enemy.x += enemy.speedX;
         enemy.y += enemy.speedY;
+
 
         double r = enemy.radius;
         {   //bounds
@@ -122,6 +134,10 @@ public class World {
         }
     }
 
+    private Optional<Unit> getBestTarget(Unit enemy) {
+        return mines.stream().filter(unit -> enemy.mass/unit.mass > 1.17).min(Comparator.comparingDouble(value -> value.getDistanceTo(enemy)));
+    }
+
     private boolean isApproximateVisible(Unit enemy) {
         for (int i = 0, minesSize = mines.size(); i < minesSize; i++) {
             Unit mine = mines.get(i);
@@ -136,5 +152,9 @@ public class World {
         ArrayList<Unit> units = new ArrayList<>(enemiesGuessed);
         units.addAll(enemies);
         return units;
+    }
+
+    public Unit getMainUnit() {
+        return Collections.max(mines, Comparator.comparingDouble(value -> value.mass));
     }
 }

@@ -29,7 +29,7 @@ public class PotentialCalcer {
         //TODO fear pleyers more
         //TODO fear players which can split on you
 
-        mainUnit = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
+        mainUnit = m.world.getMainUnit();
 
         cellSize = (int) (mainUnit.radius / 2);
 

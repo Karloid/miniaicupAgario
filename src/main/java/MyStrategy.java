@@ -51,6 +51,7 @@ public class MyStrategy {
 
             if (world.mines.isEmpty()) {
                 move.goTo(1, 1);
+                System.exit(1);
             } else {
                 potentialCalcer.move();
 
