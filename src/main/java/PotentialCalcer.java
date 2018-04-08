@@ -53,7 +53,7 @@ public class PotentialCalcer {
         lastFoodCount = currentFoodCount;
 
 
-        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 100) {
+        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 300) {
             m.move.setSplit(true);
         }
 
@@ -414,6 +414,9 @@ public class PotentialCalcer {
 
             boolean mustAdd = true;
             if (unit.type == UnitType.PLAYER) {//special case
+                if (!unit.isMy) {                               //TODO distance
+                    key = unit.getPos().add(unit.getSpeedVector().mul(3)).toPotential();
+                }
                 if (!unit.isMy && mainUnit.mass > unit.mass) {
                     mustAdd = false;
                     if (mainUnit.mass / unit.mass > 1.2) {
