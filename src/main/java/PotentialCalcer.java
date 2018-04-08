@@ -39,6 +39,7 @@ public class PotentialCalcer {
 
         Set<Map.Entry<Point2D, Integer>> enemiesToScare = getUnitsCount(true).get(UnitType.ENEMIES_TO_SCARE).entrySet();
         Set<Map.Entry<Point2D, Integer>> enemiesToEat = getUnitsCount(true).get(UnitType.ENEMIES_TO_EAT).entrySet();
+        Set<Map.Entry<Point2D, Integer>> enemiesNeutral = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
 
         int currentFoodCount = m.world.food.size();
 
@@ -53,7 +54,7 @@ public class PotentialCalcer {
         lastFoodCount = currentFoodCount;
 
 
-        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 300) {
+        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 100 && enemiesNeutral.isEmpty()) {
             m.move.setSplit(true);
         }
 
@@ -416,17 +417,16 @@ public class PotentialCalcer {
             if (unit.type == UnitType.PLAYER) {//special case
                 if (!unit.isMy) {                               //TODO distance
                     key = unit.getPos().add(unit.getSpeedVector().mul(3)).toPotential();
-                }
-                if (!unit.isMy && mainUnit.mass > unit.mass) {
-                    mustAdd = false;
-                    if (mainUnit.mass / unit.mass > 1.2) {
+
+                    if (!isSafeForMyUnits(unit)) {
+                        mustAdd = false;
+                        Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_SCARE);
+                        countMap.put(key, countMap.getOrDefault(key, 0) + 1);
+                    } else if (mainUnit.mass / unit.mass > 1.2) {
+                        mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_EAT);
                         countMap.put(key, countMap.getOrDefault(key, 0) + 1);
                     }
-                } else if (!unit.isMy && mainUnit.mass <= unit.mass) {
-                    mustAdd = false;
-                    Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_SCARE);
-                    countMap.put(key, countMap.getOrDefault(key, 0) + 1);
                 }
             }
 
@@ -435,6 +435,12 @@ public class PotentialCalcer {
                 countMap.put(key, countMap.getOrDefault(key, 0) + 1);
             }
         }
+    }
+
+    private boolean isSafeForMyUnits(Unit enemy) {
+        double minDistanceToEnemy = mainUnit.getDistanceTo(enemy) * 1.2;
+        long count = m.world.mines.stream().filter(unit -> enemy.mass / unit.mass > 1.1 && enemy.getDistanceTo(unit) < minDistanceToEnemy).count();
+        return count == 0;
     }
 
     private void subFromArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> unitsCount, double spreadRange, float factor, float minVal,
