@@ -1,5 +1,7 @@
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 import static java.lang.StrictMath.hypot;
 
 /**
@@ -20,7 +22,27 @@ public class Unit {
     public boolean isMy;
 
 
+    public boolean isGuessed;
     public World world;
+    public int addedToGuessedAt;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Unit unit = (Unit) o;
+        if (id == null || unit.id == null) {
+            return false;
+        }
+        return Objects.equals(id, unit.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
 
     public static Unit parse(JSONObject obj) {
         Unit o = new Unit();
@@ -190,5 +212,14 @@ public class Unit {
             return false;
         }
         return (int) target.x == (int) x && (int) target.y == (int) y;
+    }
+
+    public void setSpeedVector(Point2D speed) {
+        speedX = speed.getX();
+        speedY = speed.getY();
+    }
+
+    public int guessAge(int tickIndex) {
+        return tickIndex - addedToGuessedAt;
     }
 }

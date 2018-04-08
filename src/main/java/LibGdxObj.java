@@ -4,6 +4,7 @@ public class LibGdxObj extends Unit {
 
     public static final Color MY_PLAYER_COLOR = new Color(0, 0, 1, 0.6f);
     public static final Color ENEMY_PLAYER_COLOR = new Color(1, 0, 0, 0.6f);
+    public static final Color ENEMY_PLAYER_GUESSED_COLOR = new Color(0.6f, 0, 0, 0.6f);
     public static final Color VIRUS_COLOR = new Color(0, 0, 0, 0.8f);
 
     public LibGdxObj(Unit other) {
@@ -18,6 +19,7 @@ public class LibGdxObj extends Unit {
         this.mass = other.mass;
         this.isMy = other.isMy;
         this.world = other.world;
+        this.isGuessed = other.isGuessed;
         onConstruct();
     }
 
@@ -47,7 +49,7 @@ public class LibGdxObj extends Unit {
             case FOOD:
                 return Color.GRAY;
             case PLAYER:
-                return ENEMY_PLAYER_COLOR;
+                return isGuessed ? ENEMY_PLAYER_GUESSED_COLOR : ENEMY_PLAYER_COLOR;
             case EJECTION:
                 return Color.BLUE;
             case VIRUS:

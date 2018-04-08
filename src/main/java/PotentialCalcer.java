@@ -53,7 +53,7 @@ public class PotentialCalcer {
         lastFoodCount = currentFoodCount;
 
 
-        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 500) {
+        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 100) {
             m.move.setSplit(true);
         }
 
@@ -398,7 +398,7 @@ public class PotentialCalcer {
             calcUnitCount(m.world.mines);
             calcUnitCount(m.world.food);
             calcUnitCount(m.world.ejections);
-            calcUnitCount(m.world.enemies);
+            calcUnitCount(m.world.getAllEnemies());
             calcUnitCount(m.world.viruses);
         }
 

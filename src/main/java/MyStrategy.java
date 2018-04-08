@@ -194,6 +194,8 @@ public class MyStrategy {
         this.me = me;
         //this.opponent = world.getOpponentPlayer();
         this.world = world;
+        world.processPrev(prevWorld);
+
         this.game = game;
         this.move = move;
 

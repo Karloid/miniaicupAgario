@@ -16,9 +16,10 @@ public class World {
     public List<Unit> mines = new ArrayList<>(0);
     public List<Unit> viruses = new ArrayList<>(0);
     public List<Unit> enemies = new ArrayList<>(0); //TODO groups
+    public List<Unit> enemiesGuessed = new ArrayList<>(0);
 
     public World(JSONObject jsonObject) {
-       // Utils.log("World: " + jsonObject.toString());
+        // Utils.log("World: " + jsonObject.toString());
 
 
         JSONArray minesObjects = jsonObject.getJSONArray("Mine");
@@ -56,10 +57,84 @@ public class World {
             }
         }
     }
-    
 
 
     public int getTickIndex() {
         return tickIndex;
+    }
+
+    public void processPrev(World prevWorld) {
+        if (prevWorld == null) {
+            return;
+        }
+
+
+        for (Unit guessedEnemy : prevWorld.enemiesGuessed) {
+            if (!enemies.contains(guessedEnemy) && guessedEnemy.guessAge(tickIndex) < 130) {
+                simulateTick(guessedEnemy);
+            }
+        }
+
+
+        for (Unit oldEnemy : prevWorld.enemies) {
+            int i = enemies.indexOf(oldEnemy);
+            if (i == -1) {
+                if (!isApproximateVisible(oldEnemy)) {
+                    oldEnemy.addedToGuessedAt = tickIndex;
+                    enemiesGuessed.add(oldEnemy);
+                }
+            } else {
+                processDiff(enemies.get(i), oldEnemy);
+            }
+        }
+    }
+
+    private void processDiff(Unit newEnemy, Unit oldEnemy) {
+        Point2D speed = newEnemy.getPos().sub(oldEnemy.getPos());
+        newEnemy.setSpeedVector(speed);
+    }
+
+    private void simulateTick(Unit enemy) {
+        enemy.x += enemy.speedX;
+        enemy.y += enemy.speedY;
+
+        double r = enemy.radius;
+        {   //bounds
+            if (enemy.x < 0 + r) {
+                enemy.x = r;
+            }
+
+            if (enemy.y < 0 + r) {
+                enemy.y = r;
+            }
+
+            if (enemy.x > Main.game.GAME_WIDTH - r) {
+                enemy.x = Main.game.GAME_WIDTH - r;
+            }
+
+            if (enemy.y > Main.game.GAME_HEIGHT - r) {
+                enemy.y = Main.game.GAME_HEIGHT - r;
+            }
+        }
+
+        if (!isApproximateVisible(enemy)) {
+            enemiesGuessed.add(enemy);
+        }
+    }
+
+    private boolean isApproximateVisible(Unit enemy) {
+        for (int i = 0, minesSize = mines.size(); i < minesSize; i++) {
+            Unit mine = mines.get(i);
+            if (mine.getVisionDistance() - 10 > mine.getDistanceTo(enemy) - enemy.radius) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Unit> getAllEnemies() {
+        ArrayList<Unit> units = new ArrayList<>(enemiesGuessed);
+        units.addAll(enemies);
+        return units;
     }
 }

@@ -31,6 +31,10 @@ public class LibGdxPainter implements MyStrategyPainter {
             data.objs.add(new LibGdxObj(enemy));
         }
 
+        for (Unit enemy : myStrategy.world.enemiesGuessed) {
+            data.objs.add(new LibGdxObj(enemy));
+        }
+
     }
 
     @Override
