@@ -151,8 +151,11 @@ public class PotentialCalcer {
 
         //TODO predictions
         //TODO calc angles
-        //TODO remember enemies
-        //TODO shadows
+        //TODO shadows !!!
+
+        //TODO do not fear corners if no enemy
+        //TODO do not return to places where food was eaten
+
 
         m.log("calcMap, ticks without cacl: " + (m.world.tickIndex - lastCalcMapTick));
         lastCalcMapTick = m.world.tickIndex;
