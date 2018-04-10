@@ -4,6 +4,7 @@ public class PotentialCalcer {
     private final MyStrategy m;
     private int potentialMapCalcAt;
     public static int cellSize = 6;
+    private HashMap<UnitType, List<Unit>> enemyUnits;
     private HashMap<UnitType, Map<Point2D, Integer>> enemyUnitsCount;
     private HashMap<UnitType, Map<Point2D, Integer>> myUnitsCount;
     private HashMap<Point2D, Integer> cornersPushers;
@@ -177,7 +178,8 @@ public class PotentialCalcer {
         double range = plainArray.cellsWidth * 1.2;
 
 
-        if (enemiesToEat.isEmpty() && enemiesToScare.isEmpty()) { //food guessing/calcing
+        boolean isNoEnemiesHere = enemiesToEat.isEmpty() && enemiesToScare.isEmpty();
+        if (isNoEnemiesHere) { //food guessing/calcing
             double tmp = visionDistance * 1.3;
             float guessFoodSquareDist = (float) ((tmp / cellSize) * (tmp / cellSize));
             float visionSquareDist = (float) ((visionDistance / cellSize) * (visionDistance / cellSize));
@@ -223,9 +225,16 @@ public class PotentialCalcer {
 
         addAnglePositive(plainArray, mainUnitPosPotential, calcDistancePotential);
 
+        if (isNoEnemiesHere) {
+            subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 2 / cellSize,
+                    15.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        }
         subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
 
-        subCorners(plainArray, mainUnitPosPotential, calcDistancePotential);
+        //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
+        if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
+            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
+        }
 
         { //add negative to corners
           /*  int maxDistanceSquare = 3 * 3;
@@ -331,7 +340,7 @@ public class PotentialCalcer {
         return potentialMap;
     }
 
-    private void subCorners(PlainArray plainArray, Point2D calcPoint, double calculateRadius) {
+    private void subCorners(PlainArray plainArray, Point2D calcPoint, double calculateRadius, float ratio) {
         double squareCalcRadius = calculateRadius * calculateRadius;
 
         int radius = (Main.game.GAME_WIDTH / 2) / cellSize - 2;
@@ -353,7 +362,7 @@ public class PotentialCalcer {
                 }
                 double distanceFromRadius = distanceFromCenter - radius;
 
-                plainArray.set(x, y, plainArray.get(x, y) - 160 * (distanceFromRadius / diagonalMinusRadius));
+                plainArray.set(x, y, plainArray.get(x, y) - 160 * (distanceFromRadius / diagonalMinusRadius) * ratio);
             }
         }
     }
@@ -393,11 +402,13 @@ public class PotentialCalcer {
 
     private Map<UnitType, Map<Point2D, Integer>> getUnitsCount(boolean enemy) {
         if (enemyUnitsCount == null) {
+            enemyUnits = new HashMap<>();
             enemyUnitsCount = new HashMap<>();
             myUnitsCount = new HashMap<>();
             for (UnitType unitType : UnitType.values()) {   //TODO respect heals, respect movement
                 enemyUnitsCount.put(unitType, new HashMap<>());
                 myUnitsCount.put(unitType, new HashMap<>());
+                enemyUnits.put(unitType, new ArrayList<>(5));
             }
 
             calcUnitCount(m.world.mines);
@@ -405,6 +416,7 @@ public class PotentialCalcer {
             calcUnitCount(m.world.ejections);
             calcUnitCount(m.world.getAllEnemies());
             calcUnitCount(m.world.viruses);
+            calcUnitCount(m.world.mainTrace);
         }
 
 
@@ -423,10 +435,12 @@ public class PotentialCalcer {
                     key = unit.getPos().add(unit.getSpeedVector().mul(3)).toPotential();
 
                     if (!isSafeForMyUnits(unit)) {
+                        enemyUnits.get(UnitType.ENEMIES_TO_SCARE).add(unit);
                         mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_SCARE);
                         countMap.put(key, countMap.getOrDefault(key, 0) + 1);
                     } else if (mainUnit.mass / unit.mass > 1.2) {
+                        enemyUnits.get(UnitType.ENEMIES_TO_EAT).add(unit);
                         mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_EAT);
                         countMap.put(key, countMap.getOrDefault(key, 0) + 1);
@@ -457,7 +471,7 @@ public class PotentialCalcer {
             return;
         }
 
-        double squareDelta = spreadRange * spreadRange;
+        double squareSpread = spreadRange * spreadRange;
 
         double squareCalcRadius = calcRadius * calcRadius;
 
@@ -478,6 +492,51 @@ public class PotentialCalcer {
                     val = val * factor;
                     double squareDist = entry.getKey().squareDistance(x, y);
 
+                    if (squareDist > squareSpread) {
+                        continue;
+                    }
+
+                    double value = (1 - squareDist / squareSpread) * val;
+                    if (value > 1) {
+                        plainArray.set(x, y, plainArray.get(x, y) - value);
+                    }
+                }
+            }
+        }
+    }
+
+    private void subEnemies(PlainArray plainArray, double spreadRange, float factor, float minVal,
+                            Point2D calcPoint, double calcRadius) {
+
+
+        double squareDelta = spreadRange * spreadRange;
+
+        double squareCalcRadius = calcRadius * calcRadius;
+
+        for (int x = 0; x < plainArray.cellsWidth; x++) {
+            for (int y = 0; y < plainArray.cellsHeight; y++) {
+
+                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
+
+                List<Unit> get = enemyUnits.get(UnitType.ENEMIES_TO_SCARE);
+                for (int i = 0, getSize = get.size(); i < getSize; i++) {
+                    Unit unit = get.get(i);
+
+                }
+
+/*
+                for (Map.Entry<Point2D, Integer> entry : unitsCount) {
+                    float val = entry.getValue();
+                    if (val < minVal) {
+                        continue;
+                    }
+
+
+                    val = val * factor;
+                    double squareDist = entry.getKey().squareDistance(x, y);
+
                     if (squareDist > squareDelta) {
                         continue;
                     }
@@ -487,6 +546,7 @@ public class PotentialCalcer {
                         plainArray.set(x, y, plainArray.get(x, y) - value);
                     }
                 }
+*/
             }
         }
     }

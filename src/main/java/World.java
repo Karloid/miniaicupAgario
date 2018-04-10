@@ -17,6 +17,8 @@ public class World {
     public List<Unit> enemies = new ArrayList<>(0); //TODO groups
     public List<Unit> enemiesGuessed = new ArrayList<>(0);
 
+    public List<Unit> mainTrace = new ArrayList<>(0);
+
     public World(JSONObject jsonObject) {
         // Utils.log("World: " + jsonObject.toString());
 
@@ -86,6 +88,20 @@ public class World {
                 processDiff(enemies.get(i), oldEnemy);
             }
         }
+        mainTrace = prevWorld.mainTrace;
+
+        if (tickIndex % 20 == 0) {
+            Unit mainUnit = prevWorld.getMainUnit();
+
+            if (mainUnit != null) {
+                Unit t = new Unit(mainUnit);
+                t.type = UnitType.TRACE;
+                mainTrace.add(t);
+                if (mainTrace.size() > 55) {
+                    mainTrace.remove(0);
+                }
+            }
+        }
     }
 
     private void processDiff(Unit newEnemy, Unit oldEnemy) {
@@ -135,7 +151,7 @@ public class World {
     }
 
     private Optional<Unit> getBestTarget(Unit enemy) {
-        return mines.stream().filter(unit -> enemy.mass/unit.mass > 1.17).min(Comparator.comparingDouble(value -> value.getDistanceTo(enemy)));
+        return mines.stream().filter(unit -> enemy.mass / unit.mass > 1.17).min(Comparator.comparingDouble(value -> value.getDistanceTo(enemy)));
     }
 
     private boolean isApproximateVisible(Unit enemy) {
@@ -155,6 +171,9 @@ public class World {
     }
 
     public Unit getMainUnit() {
+        if (mines.isEmpty()) {
+            return null;
+        }
         return Collections.max(mines, Comparator.comparingDouble(value -> value.mass));
     }
 }

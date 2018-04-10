@@ -26,6 +26,25 @@ public class Unit {
     public World world;
     public int addedToGuessedAt;
 
+    public Unit(Unit other) {
+        this.radius = other.radius;
+        this.id = other.id;
+        this.x = other.x;
+        this.y = other.y;
+        this.type = other.type;
+        this.speedX = other.speedX;
+        this.speedY = other.speedY;
+        this.timeToFuse = other.timeToFuse;
+        this.mass = other.mass;
+        this.isMy = other.isMy;
+        this.isGuessed = other.isGuessed;
+        this.world = other.world;
+        this.addedToGuessedAt = other.addedToGuessedAt;
+    }
+
+    public Unit() {
+
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -47,12 +47,13 @@ public class MyStrategy {
             painter.onStartTick();
              //TODO remember enemies positions
 
-            doConstantPart();
 
             if (world.mines.isEmpty()) {
                 move.goTo(1, 1);
                 System.exit(1);
             } else {
+                doConstantPart();
+
                 potentialCalcer.move();
 
                 fireAtenemy();
@@ -201,6 +202,7 @@ public class MyStrategy {
         this.move = move;
 
         um.initializeTick();
+
     }
 
     private void initializeStrategy(World world, Game game) {

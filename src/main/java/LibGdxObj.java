@@ -3,6 +3,7 @@ import com.badlogic.gdx.graphics.Color;
 public class LibGdxObj extends Unit {
 
     public static final Color MY_PLAYER_COLOR = new Color(0, 0, 1, 0.6f);
+    public static final Color MY_PLAYER_COLOR_TRACE = new Color(0, 0, 0.5f, 0.6f);
     public static final Color ENEMY_PLAYER_COLOR = new Color(1, 0, 0, 0.6f);
     public static final Color ENEMY_PLAYER_GUESSED_COLOR = new Color(0.6f, 0, 0, 0.6f);
     public static final Color VIRUS_COLOR = new Color(0, 0, 0, 0.8f);
@@ -43,6 +44,9 @@ public class LibGdxObj extends Unit {
 
     public Color getColor() {
         if (isMy) {
+            if (type == UnitType.TRACE) {
+                return MY_PLAYER_COLOR_TRACE;
+            }
             return MY_PLAYER_COLOR;
         }
         switch (type) {
@@ -56,6 +60,12 @@ public class LibGdxObj extends Unit {
                 return VIRUS_COLOR;
             case UNKNOWN:
                 return Color.FIREBRICK;
+            case ENEMIES_TO_EAT:
+                break;
+            case ENEMIES_TO_SCARE:
+                break;
+            case TRACE:
+                return Color.OLIVE;
         }
         return Color.GOLD;
     }

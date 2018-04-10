@@ -7,6 +7,7 @@ public enum UnitType {
     UNKNOWN,
     ENEMIES_TO_EAT,
     ENEMIES_TO_SCARE,
+    TRACE,
     ;
     //TODO transient types for potential move
 }
