@@ -233,7 +233,7 @@ public class PotentialCalcer {
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
         if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
-            //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
+            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
         }
 
         subEnemies2(plainArray, visionDistance * 2 / cellSize,
