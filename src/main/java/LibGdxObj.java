@@ -3,7 +3,7 @@ import com.badlogic.gdx.graphics.Color;
 public class LibGdxObj extends Unit {
 
     public static final Color MY_PLAYER_COLOR = new Color(0, 0, 1, 0.6f);
-    public static final Color MY_PLAYER_COLOR_TRACE = new Color(0, 0, 0.5f, 0.6f);
+    public static final Color MY_PLAYER_COLOR_TRACE = new Color(0, 0, 0.5f, 0.3f);
     public static final Color ENEMY_PLAYER_COLOR = new Color(1, 0, 0, 0.6f);
     public static final Color ENEMY_PLAYER_GUESSED_COLOR = new Color(0.6f, 0, 0, 0.6f);
     public static final Color VIRUS_COLOR = new Color(0, 0, 0, 0.8f);

@@ -10,6 +10,10 @@ public class Point2D {
         this.val = val;
     }
 
+    public static double angle(double x, double y) {
+        return FastMath.atan2((float) y, (float) x);
+    }
+
     @Override
     public String toString() {
         return
@@ -176,23 +180,27 @@ public class Point2D {
     public Point2D length(double length) {
         double currentLength = this.length();
         if (currentLength == 0.0D) {
-            throw new IllegalStateException("Can\'t resize zero-width vector.");
+            return this;
         } else {
             return this.mul(length / currentLength);
         }
     }
 
-    public Point2D perpendicular() {
-        double a = y;
-        return new Point2D(a, -x);
+    public Point2D leftPerpendicular() {
+        return new Point2D(y, -x);
+    }
+
+    public Point2D rightPerpendicular() {
+        return new Point2D(-y, x);
     }
 
     public double dotProduct(Point2D vector) {
         return x * vector.x + y * vector.y;
     }
 
-    public double angle() {
-        return Math.atan2(y, x);
+    public float angle() {
+        //return Math.atan2(y, x);
+        return FastMath.atan2((float) y, (float) x);
     }
 
     public boolean nearlyEqual(Point2D potentialIntersectionPoint, double epsilon) {

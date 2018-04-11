@@ -125,7 +125,6 @@ public class World {
         enemy.x += enemy.speedX;
         enemy.y += enemy.speedY;
 
-
         double r = enemy.radius;
         {   //bounds
             if (enemy.x < 0 + r) {
@@ -144,6 +143,8 @@ public class World {
                 enemy.y = Main.game.GAME_HEIGHT - r;
             }
         }
+
+        enemy.onSimulateTick();
 
         if (!isApproximateVisible(enemy)) {
             enemiesGuessed.add(enemy);

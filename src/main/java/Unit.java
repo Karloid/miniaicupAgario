@@ -25,6 +25,7 @@ public class Unit {
     public boolean isGuessed;
     public World world;
     public int addedToGuessedAt;
+    private Point2D potentialPos;
 
     public Unit(Unit other) {
         this.radius = other.radius;
@@ -240,5 +241,20 @@ public class Unit {
 
     public int guessAge(int tickIndex) {
         return tickIndex - addedToGuessedAt;
+    }
+
+    public boolean canEat(Unit mine) {
+        return mass / mine.mass > 1.17;
+    }
+
+    public Point2D getPotentialPos() {
+        if (potentialPos == null) {
+            potentialPos = getPos().toPotential();
+        }
+        return potentialPos;//TODO
+    }
+
+    public void onSimulateTick() {
+        potentialPos = null;
     }
 }

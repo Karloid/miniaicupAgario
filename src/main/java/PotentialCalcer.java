@@ -233,8 +233,11 @@ public class PotentialCalcer {
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
         if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
-            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
+            //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
         }
+
+        subEnemies2(plainArray, visionDistance * 2 / cellSize,
+                15.4f, -1, mainUnitPosPotential, calcDistancePotential);
 
         { //add negative to corners
           /*  int maxDistanceSquare = 3 * 3;
@@ -310,27 +313,29 @@ public class PotentialCalcer {
 
 
             //strict {
-            int strictgap = (int) (mainUnit.radius / cellSize) + 1;
-            for (int x = 0; x < plainArray.cellsWidth; x++) {
-                for (int y = 0; y < plainArray.cellsHeight; y++) {
+            if (false) {   //TODO never enable?
+                int strictgap = (int) (mainUnit.radius / cellSize) + 1;
+                for (int x = 0; x < plainArray.cellsWidth; x++) {
+                    for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                    if (x < strictgap || y < strictgap || x >= plainArray.cellsWidth - strictgap || y >= plainArray.cellsHeight - strictgap) {
-                        double extra = 0;
-                        if (x < strictgap) {
-                            extra = 40 * (strictgap - x);
-                        }
-                        if (y < strictgap) {
-                            extra = 40 * (strictgap - y);
-                        }
-                        if (x >= plainArray.cellsWidth - strictgap) {
-                            extra = 40 * (strictgap - (plainArray.cellsWidth - x));
-                        }
-                        if (y >= plainArray.cellsHeight - strictgap) {
-                            extra = 40 * (strictgap - (plainArray.cellsHeight - y));
-                        }
+                        if (x < strictgap || y < strictgap || x >= plainArray.cellsWidth - strictgap || y >= plainArray.cellsHeight - strictgap) {
+                            double extra = 0;
+                            if (x < strictgap) {
+                                extra = 40 * (strictgap - x);
+                            }
+                            if (y < strictgap) {
+                                extra = 40 * (strictgap - y);
+                            }
+                            if (x >= plainArray.cellsWidth - strictgap) {
+                                extra = 40 * (strictgap - (plainArray.cellsWidth - x));
+                            }
+                            if (y >= plainArray.cellsHeight - strictgap) {
+                                extra = 40 * (strictgap - (plainArray.cellsHeight - y));
+                            }
 
-                        plainArray.set(x, y, plainArray.get(x, y) - 40 - extra);
+                            plainArray.set(x, y, plainArray.get(x, y) - 40 - extra);
 
+                        }
                     }
                 }
             }
@@ -513,17 +518,28 @@ public class PotentialCalcer {
 
         double squareCalcRadius = calcRadius * calcRadius;
 
+        List<Unit> enemies = enemyUnits.get(UnitType.ENEMIES_TO_SCARE);
+        if (enemies.isEmpty()) {
+            return;
+        }
+        int yy = 10;
+
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                    continue;
-                }
+                for (int i = 0, getSize = enemies.size(); i < getSize; i++) {
+                    Unit enemy = enemies.get(i);
+                    Point2D enemyPotential = enemy.getPotentialPos(); //TODO optimize
 
-                List<Unit> get = enemyUnits.get(UnitType.ENEMIES_TO_SCARE);
-                for (int i = 0, getSize = get.size(); i < getSize; i++) {
-                    Unit unit = get.get(i);
-
+                    double enemyDanger = ((enemy.radius * 1.2f) / cellSize) + 1;
+                    for (Unit mine : m.world.mines) {
+                        if (!enemy.canEat(mine)) {
+                            continue;
+                        }
+                        if (enemyPotential.getDistanceTo(x, y) <= enemyDanger) {
+                            plainArray.set(x, y, plainArray.get(x, y) - 100);
+                        }
+                    }
                 }
 
 /*
@@ -549,6 +565,59 @@ public class PotentialCalcer {
 */
             }
         }
+    }
+
+    private void subEnemies2(PlainArray plainArray, double spreadRange, float factor, float minVal,
+                             Point2D calcPoint, double calcRadius) {
+
+
+        double squareDelta = spreadRange * spreadRange;
+
+        double squareCalcRadius = calcRadius * calcRadius;
+
+        List<Unit> enemies = enemyUnits.get(UnitType.ENEMIES_TO_SCARE);
+        if (enemies.isEmpty()) {
+            return;
+        }
+
+
+        for (Unit mine : m.world.mines) {
+
+            Point2D minePos = mine.getPotentialPos();
+            for (int i = 0, getSize = enemies.size(); i < getSize; i++) {
+                Unit enemy = enemies.get(i);
+                if (!enemy.canEat(mine)) {
+                    continue;
+                }
+
+                double enemyDanger = (enemy.radius * 1.2f) / cellSize;
+
+                Point2D vectorToEnemy = enemy.getPotentialPos().sub(minePos);
+
+                Point2D leftEnemy = enemy.getPotentialPos().add(vectorToEnemy.leftPerpendicular().length(enemyDanger));
+                Point2D rightEnemy = enemy.getPotentialPos().add(vectorToEnemy.rightPerpendicular().length(enemyDanger));
+
+                double leftAngle = leftEnemy.sub(minePos).angle();
+                double rightAngle = rightEnemy.sub(minePos).angle();
+                subByPoint(plainArray, leftEnemy, -100);
+
+                for (int x = 0; x < plainArray.cellsWidth; x++) {
+                    for (int y = 0; y < plainArray.cellsHeight; y++) {
+                        double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
+                        if (angleToPoint >= leftAngle && angleToPoint <= rightAngle) {
+                            plainArray.set(x, y, plainArray.get(x, y) - 100);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        int yy = 10;
+    }
+
+    private void subByPoint(PlainArray plainArray, Point2D point, int val) {
+        plainArray.set(point.getIntX(), point.getIntY(), plainArray.get(point.getIntX(), point.getIntY()) + val);
     }
 
     private void addToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange, float factor) {
