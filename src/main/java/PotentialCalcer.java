@@ -214,6 +214,7 @@ public class PotentialCalcer {
                 }
             }
 
+            //TODO shadows from food
             addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
                     mainUnitPosPotential, calcDistancePotential);
         }
