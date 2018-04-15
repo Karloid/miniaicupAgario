@@ -19,6 +19,7 @@ public class PotentialCalcer {
     private int lastBestChoiceCellSize;
 
     private int lastCalcMapTick;
+    private boolean isShortMove;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -43,6 +44,8 @@ public class PotentialCalcer {
         Set<Map.Entry<Point2D, Integer>> enemiesNeutral = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
 
         int currentFoodCount = m.world.food.size();
+
+        isShortMove = enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount == 0;
 
         if (currentFoodCount != lastFoodCount
                 || m.world.getTickIndex() % 15 == 0
@@ -70,40 +73,59 @@ public class PotentialCalcer {
         int myY = lastPotentialMap.mainUnitPosPotential.getIntY();
 
         Point2D bestChoice = null;
-        int half = (int) lastPotentialMap.calcDistancePotential;
 
-        double squareCalcRadius = lastPotentialMap.calcDistancePotential * lastPotentialMap.calcDistancePotential;
+        if (isShortMove) {
+            int half = (int) lastPotentialMap.calcDistancePotential;
 
-        int bestX = 0;
-        int bestY = 0;
-        double bestVal = -99999;
-        lastPotentialMap.map.min = 999_000;
+            double squareCalcRadius = lastPotentialMap.calcDistancePotential * lastPotentialMap.calcDistancePotential;
 
-        for (int x = 0; x < lastPotentialMap.map.cellsWidth; x++) {
-            for (int y = 0; y < lastPotentialMap.map.cellsHeight; y++) {
+            for (int x = myX - half; x <= myX + half; x++) {
+                for (int y = myY - half; y <= myY + half; y++) {
+                    Point2D currentChoice = new Point2D(x, y);
+                    if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius) {
+                        continue;
+                    }
+
+                    currentChoice.setVal(lastPotentialMap.map.get(x, y));
+                    // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
+                    if (bestChoice == null || bestChoice.getVal() < currentChoice.getVal()) {
+                        //TODO check safety
+                        bestChoice = currentChoice;
+                    }
+                }
+            }
+        } else {
+            int bestX = 0;
+            int bestY = 0;
+            double bestVal = -99999;
+            lastPotentialMap.map.min = 999_000;
+
+            for (int x = 0; x < lastPotentialMap.map.cellsWidth; x++) {
+                for (int y = 0; y < lastPotentialMap.map.cellsHeight; y++) {
 
           /*      if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius) {
                     continue;
                 }*/
 
-                double val = lastPotentialMap.map.getUnsafe(x, y);
-                // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
-                if (bestVal < val) {
-                    //TODO check safety
-                    bestX = x;
-                    bestY = y;
-                    bestVal = val;
-                }
+                    double val = lastPotentialMap.map.getUnsafe(x, y);
+                    // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
+                    if (bestVal < val) {
+                        //TODO check safety
+                        bestX = x;
+                        bestY = y;
+                        bestVal = val;
+                    }
 
-                if (val < lastPotentialMap.map.min) {
-                    lastPotentialMap.map.min = val;
-                }
+                    if (val < lastPotentialMap.map.min) {
+                        lastPotentialMap.map.min = val;
+                    }
 
+                }
             }
+            bestChoice = new Point2D(bestX, bestY, bestVal);
         }
-        bestChoice = new Point2D(bestX, bestY, bestVal);
-        lastPotentialMap.map.max = bestChoice.getVal();
 
+        lastPotentialMap.map.max = bestChoice.getVal();
         boolean correctMove = !bestChoice.equals(new Point2D(myX, myY));
 
 
@@ -305,9 +327,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                //if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                //    continue;
-                //}
+                if (isShortMove && calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
 
                 Point2D point = new Point2D(x, y);
                 double distanceFromCenter = point.getDistanceTo(center);
@@ -330,9 +352,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                //if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                //    continue;
-                //}
+                if (isShortMove && calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
 
                 Point2D vectorToPoint = new Point2D(x, y).sub(calcPoint);
                 double pointAngle = vectorToPoint.angle();
@@ -432,9 +454,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                //if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                //    continue;
-                //}
+                if (isShortMove && calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
 
                 for (Map.Entry<Point2D, Integer> entry : unitsCount) {
                     float val = entry.getValue();
@@ -605,9 +627,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                //if (calculationPoint.squareDistance(x, y) > squareCalcRadius) {
-                //    continue;
-                //}
+                if (isShortMove && calculationPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
 
                 for (Map.Entry<Point2D, Integer> entry : counts) {
                     Point2D point = entry.getKey();
