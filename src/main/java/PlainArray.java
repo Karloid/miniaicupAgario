@@ -7,8 +7,8 @@ public class PlainArray {
     private final double[] array;
     public final int cellsWidth;
     public final int cellsHeight;
-    private double max = Double.MIN_VALUE;
-    private double min = 0;
+    public double max = Double.MIN_VALUE;
+    public double min = 0;
 
 
 /*     public static final int PLAIN_SMOOTH = constantId++;
@@ -34,13 +34,13 @@ public class PlainArray {
         double newValue = array[y * cellsWidth + x] + val;
         array[y * cellsWidth + x] = newValue;
 
-        checkNewValue(newValue);
+        checkNewValue(x, y, newValue);
     }
 
-    private void checkNewValue(double newValue) {
-        if (newValue > max) {
-            max = newValue;
-        }
+    private void checkNewValue(int x, int y, double newValue) {
+        // if (newValue > max) {
+        //     max = newValue;
+        // }
         if (newValue < min) {
             min = newValue;
         }
@@ -51,7 +51,7 @@ public class PlainArray {
             return;
         }
         array[y * cellsWidth + x] = val;
-        checkNewValue(val);
+        checkNewValue(x, y, val);
     }
 
     private boolean inBounds(int x, int y) {
@@ -86,5 +86,9 @@ public class PlainArray {
 
     public double getMin() {
         return min;
+    }
+
+    public double getUnsafe(int x, int y) {
+        return array[y * cellsWidth + x];
     }
 }

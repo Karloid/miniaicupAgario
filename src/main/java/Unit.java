@@ -193,7 +193,7 @@ public class Unit {
     }
 
     public double getSpeedAngle() {
-        return Math.atan2(speedY, speedX);
+        return FastMath.atan2((float) speedY, (float) speedX);
     }
 
     public double getDistanceToClosestCorner(Game game) {

@@ -74,23 +74,37 @@ public class PotentialCalcer {
 
         double squareCalcRadius = lastPotentialMap.calcDistancePotential * lastPotentialMap.calcDistancePotential;
 
-        for (int x = myX - half; x <= myX + half; x++) {
-            for (int y = myY - half; y <= myY + half; y++) {
-                Point2D currentChoice = new Point2D(x, y);
-                if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius) {
+        int bestX = 0;
+        int bestY = 0;
+        double bestVal = -99999;
+        lastPotentialMap.map.min = 999_000;
+
+        for (int x = 0; x < lastPotentialMap.map.cellsWidth; x++) {
+            for (int y = 0; y < lastPotentialMap.map.cellsHeight; y++) {
+
+          /*      if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius) {
                     continue;
+                }*/
+
+                double val = lastPotentialMap.map.getUnsafe(x, y);
+                // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
+                if (bestVal < val) {
+                    //TODO check safety
+                    bestX = x;
+                    bestY = y;
+                    bestVal = val;
                 }
 
-                currentChoice.setVal(lastPotentialMap.map.get(x, y));
-                // currentChoice.setVal(lastPotentialMap.map.get(x, y) - Point2D.getDistance(x, y, myX, myY) * 0.1);
-                if (bestChoice == null || bestChoice.getVal() < currentChoice.getVal()) {
-                    //TODO check safety
-                    bestChoice = currentChoice;
+                if (val < lastPotentialMap.map.min) {
+                    lastPotentialMap.map.min = val;
                 }
+
             }
         }
+        bestChoice = new Point2D(bestX, bestY, bestVal);
+        lastPotentialMap.map.max = bestChoice.getVal();
 
-        boolean correctMove = bestChoice != null && !bestChoice.equals(new Point2D(myX, myY));
+        boolean correctMove = !bestChoice.equals(new Point2D(myX, myY));
 
 
         if (bestChoice != null /*&& correctMove*/) {
@@ -215,7 +229,10 @@ public class PotentialCalcer {
             }
 
             //TODO shadows from food
-            addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
+            // addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
+            //         mainUnitPosPotential, calcDistancePotential);
+
+            addShadowsArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
                     mainUnitPosPotential, calcDistancePotential);
         }
 
@@ -227,92 +244,23 @@ public class PotentialCalcer {
         addAnglePositive(plainArray, mainUnitPosPotential, calcDistancePotential);
 
         if (isNoEnemiesHere) {
+            //subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
+            //        15.4f, -1, mainUnitPosPotential, calcDistancePotential, m.world.mainTrace, false);
             subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 2 / cellSize,
                     15.4f, -1, mainUnitPosPotential, calcDistancePotential);
         }
-        subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        // subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        subFromArray(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
         if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
             subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
         }
 
-        subEnemies2(plainArray, visionDistance * 2 / cellSize,
-                15.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
+                15.4f, -1, mainUnitPosPotential, calcDistancePotential, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), true);
 
-        { //add negative to corners
-          /*  int maxDistanceSquare = 3 * 3;
-
-            int distanceToFac = 6;
-
-            int maxIndex = plainArray.cellsWidth - 1;
-            Map<Point2D, Integer> allFacCounts;
-
-
-            allFacCounts = new HashMap<>();
-      *//*      for (Map<Point2D, Integer> counts : getFacilitiesCount().get(opponent.getId()).values()) {
-                allFacCounts.putAll(counts);
-            }
-
-            for (Map<Point2D, Integer> counts : getFacilitiesCount().get(-1L).values()) {
-                allFacCounts.putAll(counts);
-            }*//*
-
-            if (cornersPushers == null) {
-                cornersPushers = new HashMap<>();
-
-                cornersPushers.put(new Point2D(0, 0), 1);
-                cornersPushers.put(new Point2D(0, maxIndex), 1);
-                cornersPushers.put(new Point2D(maxIndex, 0), 1);
-                cornersPushers.put(new Point2D(maxIndex, maxIndex), 1);
-            }
-            HashMap<Point2D, Integer> cornerPushersFiltered = new HashMap<>(cornersPushers);
-            cornerPushersFiltered.keySet().removeIf(corner -> {
-           *//*     for (Map.Entry<Point2D, Integer> facPoint : food) {
-                    if (facPoint.getKey().squareDistance(corner) < maxDistanceSquare) {
-                        return true;
-                    }
-                }*//*
-                return false;
-            });
-
-
-            cornerPushersFiltered.keySet().removeIf(corner -> {
-                int distanceThreshold = 13 * 13;
-
-                return false;
-            });
-
-
-            subFromArray(plainArray, cornerPushersFiltered.entrySet(), (Main.game.GAME_WIDTH * 0.35) / cellSize, 4, -1, mainUnitPosPotential, calcDistancePotential);
-
-            if (sidesPushers == null) {
-                sidesPushers = new HashMap<>();
-                int[] coordinates = {0, maxIndex};
-                for (int i = 0; i < plainArray.cellsWidth; i++) {
-                    sidesPushers.put(new Point2D(i, 0), 1);
-                    sidesPushers.put(new Point2D(i, maxIndex), 1);
-                    sidesPushers.put(new Point2D(0, i), 1);
-                    sidesPushers.put(new Point2D(maxIndex, i), 1);
-
-                }
-            }
-            HashMap<Point2D, Integer> sidesPushersFiltered = new HashMap<>(sidesPushers);
-
-            Set<Map.Entry<Point2D, Integer>> finalFood = food;
-            sidesPushersFiltered.keySet().removeIf(side -> {
-                for (Map.Entry<Point2D, Integer> facPoint : finalFood) {
-                    if (facPoint.getKey().squareDistance(side) < maxDistanceSquare) {
-                        return true;
-                    }
-                }
-                return false;
-            });*/
-
-
-            //subFromArray(plainArray, sidesPushersFiltered.entrySet(), (mainUnit.radius * 2) / cellSize, 1.1f, -1, mainUnitPosPotential, calcDistancePotential);
-
-
+        {
             //strict {
             if (false) {   //TODO never enable?
                 int strictgap = (int) (mainUnit.radius / cellSize) + 1;
@@ -334,7 +282,7 @@ public class PotentialCalcer {
                                 extra = 40 * (strictgap - (plainArray.cellsHeight - y));
                             }
 
-                            plainArray.set(x, y, plainArray.get(x, y) - 40 - extra);
+                            plainArray.set(x, y, plainArray.getUnsafe(x, y) - 40 - extra);
 
                         }
                     }
@@ -357,9 +305,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                    continue;
-                }
+                //if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                //    continue;
+                //}
 
                 Point2D point = new Point2D(x, y);
                 double distanceFromCenter = point.getDistanceTo(center);
@@ -368,7 +316,7 @@ public class PotentialCalcer {
                 }
                 double distanceFromRadius = distanceFromCenter - radius;
 
-                plainArray.set(x, y, plainArray.get(x, y) - 160 * (distanceFromRadius / diagonalMinusRadius) * ratio);
+                plainArray.set(x, y, plainArray.getUnsafe(x, y) - 160 * (distanceFromRadius / diagonalMinusRadius) * ratio);
             }
         }
     }
@@ -382,9 +330,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                    continue;
-                }
+                //if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                //    continue;
+                //}
 
                 Point2D vectorToPoint = new Point2D(x, y).sub(calcPoint);
                 double pointAngle = vectorToPoint.angle();
@@ -401,7 +349,7 @@ public class PotentialCalcer {
                 if (vectorLength <= 3) {
                     addition *= 0.75;
                 }
-                plainArray.set(x, y, plainArray.get(x, y) + addition);
+                plainArray.set(x, y, plainArray.getUnsafe(x, y) + addition);
             }
         }
     }
@@ -484,9 +432,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
-                    continue;
-                }
+                //if (calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                //    continue;
+                //}
 
                 for (Map.Entry<Point2D, Integer> entry : unitsCount) {
                     float val = entry.getValue();
@@ -497,14 +445,14 @@ public class PotentialCalcer {
 
                     val = val * factor;
                     double squareDist = entry.getKey().squareDistance(x, y);
-
+                    //
                     if (squareDist > squareSpread) {
                         continue;
                     }
 
                     double value = (1 - squareDist / squareSpread) * val;
                     if (value > 1) {
-                        plainArray.set(x, y, plainArray.get(x, y) - value);
+                        plainArray.set(x, y, plainArray.getUnsafe(x, y) - value);
                     }
                 }
             }
@@ -538,7 +486,7 @@ public class PotentialCalcer {
                             continue;
                         }
                         if (enemyPotential.getDistanceTo(x, y) <= enemyDanger) {
-                            plainArray.set(x, y, plainArray.get(x, y) - 100);
+                            plainArray.set(x, y, plainArray.getUnsafe(x, y) - 100);
                         }
                     }
                 }
@@ -568,16 +516,15 @@ public class PotentialCalcer {
         }
     }
 
-    private void subEnemies2(PlainArray plainArray, double spreadRange, float factor, float minVal,
-                             Point2D calcPoint, double calcRadius) {
+    private void subEnemiesShadows(PlainArray plainArray, double spreadRange, float factor, float minVal,
+                                   Point2D calcPoint, double calcRadius, List<Unit> units, boolean checkCanEat) {
 
 
         double squareDelta = spreadRange * spreadRange;
 
         double squareCalcRadius = calcRadius * calcRadius;
 
-        List<Unit> enemies = enemyUnits.get(UnitType.ENEMIES_TO_SCARE);
-        if (enemies.isEmpty()) {
+        if (units.isEmpty()) {
             return;
         }
 
@@ -585,9 +532,9 @@ public class PotentialCalcer {
         for (Unit mine : m.world.mines) {
 
             Point2D minePos = mine.getPotentialPos();
-            for (int i = 0, getSize = enemies.size(); i < getSize; i++) {
-                Unit enemy = enemies.get(i);
-                if (!enemy.canEat(mine)) {
+            for (int i = 0, getSize = units.size(); i < getSize; i++) {
+                Unit enemy = units.get(i);
+                if (checkCanEat && !enemy.canEat(mine)) {
                     continue;
                 }
 
@@ -600,13 +547,18 @@ public class PotentialCalcer {
 
                 double leftAngle = leftEnemy.sub(minePos).angle();
                 double rightAngle = rightEnemy.sub(minePos).angle();
-                subByPoint(plainArray, leftEnemy, -100);
+                // subByPoint(plainArray, leftEnemy, -100);
 
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (angleToPoint >= leftAngle && angleToPoint <= rightAngle) {
                             plainArray.set(x, y, plainArray.get(x, y) - 100);
+                        } else {
+                            double min = Math.min(Math.abs(leftAngle - angleToPoint), Math.abs(angleToPoint - rightAngle));
+                            if (min < Math.PI / 3) {
+                                plainArray.set(x, y, plainArray.get(x, y) - 100 * (1 - min / (Math.PI / 3)));
+                            }
                         }
                     }
                 }
@@ -653,9 +605,9 @@ public class PotentialCalcer {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                if (calculationPoint.squareDistance(x, y) > squareCalcRadius) {
-                    continue;
-                }
+                //if (calculationPoint.squareDistance(x, y) > squareCalcRadius) {
+                //    continue;
+                //}
 
                 for (Map.Entry<Point2D, Integer> entry : counts) {
                     Point2D point = entry.getKey();
@@ -682,6 +634,101 @@ public class PotentialCalcer {
                         plainArray.set(x, y, currentValue > value ? currentValue + 0.1f * value : value);
                     } else {
                         plainArray.set(x, y, Math.max(currentValue, value));
+                    }
+                }
+            }
+        }
+    }
+
+    private void addShadowsArray2(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
+                                  float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
+        if (counts.isEmpty()) {
+            return;
+        }
+
+
+        for (Unit mine : m.world.mines) {
+
+            Point2D minePos = mine.getPotentialPos();
+
+            double countRadius = Math.max((mine.radius * 1) / cellSize, 1);
+            for (Map.Entry<Point2D, Integer> count : counts) {
+
+                Point2D countPos = count.getKey();
+
+                Point2D vectorToCount = countPos.sub(minePos);
+
+                Point2D leftEnemy = countPos.add(vectorToCount.leftPerpendicular().length(countRadius));
+                Point2D rightEnemy = countPos.add(vectorToCount.rightPerpendicular().length(countRadius));
+
+                double leftAngle = leftEnemy.sub(minePos).angle();
+                double rightAngle = rightEnemy.sub(minePos).angle();
+
+                for (int x = 0; x < plainArray.cellsWidth; x++) {
+                    for (int y = 0; y < plainArray.cellsHeight; y++) {
+                        double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
+                        if (angleToPoint >= leftAngle && angleToPoint <= rightAngle) {
+                            plainArray.set(x, y, plainArray.get(x, y) + 100 * count.getValue());
+                        }
+                    }
+                }
+
+            }
+        }
+
+        int yy = 10;
+    }
+
+    private void addShadowsArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
+                                 float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
+        if (counts.isEmpty()) {
+            return;
+        }
+
+        List<AddShadowData> data = new ArrayList<>();
+
+
+        for (Unit mine : m.world.mines) {
+
+            Point2D minePos = mine.getPotentialPos();
+
+            double countRadius = Math.max((mine.radius * 1) / cellSize, 1);
+            for (Map.Entry<Point2D, Integer> count : counts) {
+
+                Point2D countPos = count.getKey();
+
+                Point2D vectorToCount = countPos.sub(minePos);
+
+                Point2D leftEnemy = countPos.add(vectorToCount.leftPerpendicular().length(countRadius));
+                Point2D rightEnemy = countPos.add(vectorToCount.rightPerpendicular().length(countRadius));
+
+                double leftAngle = leftEnemy.sub(minePos).angle();
+                double rightAngle = rightEnemy.sub(minePos).angle();
+                data.add(new AddShadowData(minePos, leftAngle, rightAngle, count.getValue(), count.getKey(), count.getKey().squareDistance(minePos)));
+            }
+        }
+
+
+        addShadowsArrayInner(plainArray, factor, data);
+    }
+
+    private void addShadowsArrayInner(PlainArray plainArray, float factor, List<AddShadowData> data) {
+        for (int x = 0; x < plainArray.cellsWidth; x++) {
+            for (int y = 0; y < plainArray.cellsHeight; y++) {
+
+                Set<Point2D> eatenPoints = null;
+                for (AddShadowData d : data) {
+                    if ((eatenPoints == null || !eatenPoints.contains(d.pos)) && d.pos.squareDistance(x, y) > d.squareGapDistance) {
+
+                        double angleToPoint = Point2D.angle(x - d.minePos.getX(), y - d.minePos.getY());
+                        if (angleToPoint >= d.leftAngle && angleToPoint <= d.rightAngle) {
+                            if (eatenPoints == null) {
+                                eatenPoints = new HashSet<>(1);
+                            }
+                            eatenPoints.add(d.pos);
+
+                            plainArray.set(x, y, plainArray.getUnsafe(x, y) + 100 * d.value * factor);
+                        }
                     }
                 }
             }
