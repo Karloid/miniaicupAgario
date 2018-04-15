@@ -45,7 +45,7 @@ public class PotentialCalcer {
 
         int currentFoodCount = m.world.food.size();
 
-        isShortMove = enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount == 0;
+        isShortMove = !(enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount > 0);
 
         if (currentFoodCount != lastFoodCount
                 || m.world.getTickIndex() % 15 == 0
@@ -439,7 +439,7 @@ public class PotentialCalcer {
                         mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_SCARE);
                         countMap.put(key, countMap.getOrDefault(key, 0) + 1);
-                    } else if (mainUnit.mass / unit.mass > 1.2) {
+                    } else if (mainUnit.mass / unit.mass > 1.2 && !unit.isGuessed) {
                         enemyUnits.get(UnitType.ENEMIES_TO_EAT).add(unit);
                         mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_EAT);

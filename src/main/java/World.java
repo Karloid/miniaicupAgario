@@ -82,6 +82,7 @@ public class World {
             if (i == -1) {
                 if (!isApproximateVisible(oldEnemy)) {
                     oldEnemy.addedToGuessedAt = tickIndex;
+                    oldEnemy.isGuessed = true;
                     enemiesGuessed.add(oldEnemy);
                 }
             } else {
