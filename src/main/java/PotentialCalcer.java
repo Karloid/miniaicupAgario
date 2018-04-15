@@ -317,6 +317,10 @@ public class PotentialCalcer {
     }
 
     private void subCorners(PlainArray plainArray, Point2D calcPoint, double calculateRadius, float ratio) {
+        Point2D minePos = mainUnit.getPotentialPos();
+
+        int mineQ = getMapQuarter(plainArray, minePos.getX(), minePos.getY());
+
         double squareCalcRadius = calculateRadius * calculateRadius;
 
         int radius = (Main.game.GAME_WIDTH / 2) / cellSize - 2;
@@ -331,6 +335,10 @@ public class PotentialCalcer {
                     continue;
                 }
 
+                if (getMapQuarter(plainArray, x, y) != mineQ) {
+                    continue;
+                }
+
                 Point2D point = new Point2D(x, y);
                 double distanceFromCenter = point.getDistanceTo(center);
                 if (distanceFromCenter < radius) {
@@ -340,6 +348,22 @@ public class PotentialCalcer {
 
                 plainArray.set(x, y, plainArray.getUnsafe(x, y) - 160 * (distanceFromRadius / diagonalMinusRadius) * ratio);
             }
+        }
+    }
+
+    private int getMapQuarter(PlainArray plainArray, double x, double y) {
+        int half = plainArray.cellsWidth / 2;
+        if (x < half) {
+            if (y < half) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+        if (y < half) {
+            return 2;
+        } else {
+            return 3;
         }
     }
 
@@ -579,7 +603,7 @@ public class PotentialCalcer {
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
                             plainArray.set(x, y, plainArray.get(x, y) - 100);
                         } else {
-                            double min = Math.min(Math.abs(leftAngle - angleToPoint), Math.abs(angleToPoint - rightAngle));
+                            double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
                             if (min < Math.PI / 3) {
                                 plainArray.set(x, y, plainArray.get(x, y) - 100 * (1 - min / (Math.PI / 3)));
                             }
@@ -591,6 +615,18 @@ public class PotentialCalcer {
         }
 
         int yy = 10;
+    }
+
+    private double getAngleDelta(double minAngle, double maxAngle, double angleToPoint) {
+        double result = Math.min(Math.abs(angleToPoint - minAngle), Math.abs(angleToPoint - maxAngle));
+        if (result < Math.PI / 3) {
+            return result;
+        }
+
+        result = Math.min(result, Math.abs(-Math.PI - minAngle) + Math.PI - angleToPoint);
+        result = Math.min(result, Math.abs(-Math.PI - angleToPoint) + Math.PI - maxAngle);
+
+        return result;
     }
 
     private void subByPoint(PlainArray plainArray, Point2D point, int val) {
