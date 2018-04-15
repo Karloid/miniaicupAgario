@@ -5,4 +5,5 @@ public class LibGdxDataToPaint {
     public List<LibGdxObj> objs = new ArrayList<>();
     public Move move;
     public PotentialMap potentialMap;
+    public Unit mainUnit;
 }

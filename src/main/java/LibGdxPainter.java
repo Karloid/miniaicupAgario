@@ -10,6 +10,8 @@ public class LibGdxPainter implements MyStrategyPainter {
     @Override
     public void onStartTick() {
         data = new LibGdxDataToPaint();
+
+        data.mainUnit = myStrategy.world.getMainUnit();
         
         for (Unit enemy : myStrategy.world.food) {
             data.objs.add(new LibGdxObj(enemy));

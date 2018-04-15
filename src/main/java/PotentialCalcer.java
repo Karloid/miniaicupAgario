@@ -570,11 +570,13 @@ public class PotentialCalcer {
                 double leftAngle = leftEnemy.sub(minePos).angle();
                 double rightAngle = rightEnemy.sub(minePos).angle();
                 // subByPoint(plainArray, leftEnemy, -100);
+                double minAngle = Math.min(leftAngle, rightAngle);
+                double maxAngle = Math.max(leftAngle, rightAngle);
 
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
-                        if (angleToPoint >= leftAngle && angleToPoint <= rightAngle) {
+                        if (itsBetween(angleToPoint, minAngle, maxAngle)) {
                             plainArray.set(x, y, plainArray.get(x, y) - 100);
                         } else {
                             double min = Math.min(Math.abs(leftAngle - angleToPoint), Math.abs(angleToPoint - rightAngle));
@@ -685,11 +687,13 @@ public class PotentialCalcer {
 
                 double leftAngle = leftEnemy.sub(minePos).angle();
                 double rightAngle = rightEnemy.sub(minePos).angle();
+                double minAngle = Math.min(leftAngle, rightAngle);
+                double maxAngle = Math.max(leftAngle, rightAngle);
 
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
-                        if (angleToPoint >= leftAngle && angleToPoint <= rightAngle) {
+                        if (itsBetween(angleToPoint, minAngle, maxAngle)) {
                             plainArray.set(x, y, plainArray.get(x, y) + 100 * count.getValue());
                         }
                     }
@@ -726,7 +730,7 @@ public class PotentialCalcer {
 
                 double leftAngle = leftEnemy.sub(minePos).angle();
                 double rightAngle = rightEnemy.sub(minePos).angle();
-                data.add(new AddShadowData(minePos, leftAngle, rightAngle, count.getValue(), count.getKey(), count.getKey().squareDistance(minePos)));
+                data.add(new AddShadowData(minePos, Math.min(leftAngle, rightAngle), Math.max(leftAngle, rightAngle), count.getValue(), count.getKey(), count.getKey().squareDistance(minePos)));
             }
         }
 
@@ -746,7 +750,7 @@ public class PotentialCalcer {
                     if ((eatenPoints == null || !eatenPoints.contains(d.pos)) && d.pos.squareDistance(x, y) >= d.squareGapDistance) {
 
                         double angleToPoint = Point2D.angle(x - d.minePos.getX(), y - d.minePos.getY());
-                        if (angleToPoint >= d.leftAngle && angleToPoint <= d.rightAngle) {
+                        if (itsBetween(angleToPoint, d.minAngle, d.maxAngle)) {
                             if (eatenPoints == null) {
                                 eatenPoints = new HashSet<>(1);
                             }
@@ -758,5 +762,14 @@ public class PotentialCalcer {
                 }
             }
         }
+    }
+
+    private boolean itsBetween(double angleToPoint, double minAngle, double maxAngle) {
+        if (minAngle < 0 && maxAngle > 0) {
+            if (Math.abs(-Math.PI - minAngle) + Math.PI - maxAngle < maxAngle - minAngle) {
+                return angleToPoint > maxAngle || angleToPoint < minAngle;
+            }
+        }
+        return angleToPoint >= minAngle && angleToPoint <= maxAngle;
     }
 }

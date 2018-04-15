@@ -219,7 +219,18 @@ public class LibGdxShower implements ApplicationListener {
 
         if (data.potentialMap != null) {
             font.setColor(Color.BLACK);
-            font.draw(batch, Utils.format(data.potentialMap.map.get(cX, cY)), cX * data.potentialMap.cellSize, cY * data.potentialMap.cellSize);
+            int realX = cX * data.potentialMap.cellSize;
+            int realY = cY * data.potentialMap.cellSize;
+
+            String msg = Utils.format(data.potentialMap.map.get(cX + 10, cY));
+            if (data.mainUnit != null) {
+                Point2D vectorToCursor = new Point2D(cX, cY).sub(data.mainUnit.getPotentialPos());
+                float angle = vectorToCursor.angle();
+                msg += " v: x" + Utils.format(vectorToCursor.getX()) + " y" + Utils.format(vectorToCursor.getY()) + " a: " + Utils.format(angle);
+            }
+
+
+            font.draw(batch, msg, realX, realY);
         }
 
         batch.end();
