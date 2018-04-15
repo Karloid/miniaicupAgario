@@ -709,16 +709,19 @@ public class PotentialCalcer {
         }
 
 
-        addShadowsArrayInner(plainArray, factor, data);
+        addShadowsArrayInner(plainArray, factor, data, true);
     }
 
-    private void addShadowsArrayInner(PlainArray plainArray, float factor, List<AddShadowData> data) {
+    private void addShadowsArrayInner(PlainArray plainArray, float factor, List<AddShadowData> data, boolean onlyEven) {
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
+                if (onlyEven && !(x % 2 == 0 && y % 2 == 0)) {
+                    continue;
+                }
                 Set<Point2D> eatenPoints = null;
                 for (AddShadowData d : data) {
-                    if ((eatenPoints == null || !eatenPoints.contains(d.pos)) && d.pos.squareDistance(x, y) > d.squareGapDistance) {
+                    if ((eatenPoints == null || !eatenPoints.contains(d.pos)) && d.pos.squareDistance(x, y) >= d.squareGapDistance) {
 
                         double angleToPoint = Point2D.angle(x - d.minePos.getX(), y - d.minePos.getY());
                         if (angleToPoint >= d.leftAngle && angleToPoint <= d.rightAngle) {

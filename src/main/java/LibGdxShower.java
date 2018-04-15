@@ -136,8 +136,13 @@ public class LibGdxShower implements ApplicationListener {
 
     private void drawPP(LibGdxDataToPaint data) {
 
+        int cX = 0;
+        int cY = 0;
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         if (data.potentialMap != null) {
+            cX = (int) ((Gdx.input.getX() * (990 / 700f)) / data.potentialMap.cellSize);
+            cY = (int) ((Gdx.input.getY() * (990 / 700f)) / data.potentialMap.cellSize);
+
             PlainArray plainArray = data.potentialMap.map;
 
             didDrawPP = true;
@@ -194,6 +199,10 @@ public class LibGdxShower implements ApplicationListener {
             shapes.setColor(Color.GOLD);
             shapes.circle(realX, realY, (cellSize / 2));
 
+            shapes.setColor(Color.CYAN);
+            //shapes.setColor(Color.GOLD);
+            shapes.rect(cX * cellSize, cY * cellSize, cellSize, cellSize);
+
             shapes.end();
             shapes.begin(ShapeRenderer.ShapeType.Line);
 
@@ -205,6 +214,15 @@ public class LibGdxShower implements ApplicationListener {
         }
 
         shapes.end();
+
+        batch.begin();
+
+        if (data.potentialMap != null) {
+            font.setColor(Color.BLACK);
+            font.draw(batch, Utils.format(data.potentialMap.map.get(cX, cY)), cX * data.potentialMap.cellSize, cY * data.potentialMap.cellSize);
+        }
+
+        batch.end();
 
     }
 
