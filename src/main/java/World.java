@@ -8,6 +8,7 @@ import java.util.*;
  */
 @SuppressWarnings("ForLoopWithMissingComponent")
 public class World {
+    private static final double FOOD_RADIUS = 2.5f;
     public int tickIndex;
 
     public List<Unit> food = new ArrayList<>(0);
@@ -16,6 +17,7 @@ public class World {
     public List<Unit> viruses = new ArrayList<>(0);
     public List<Unit> enemies = new ArrayList<>(0); //TODO groups
     public List<Unit> enemiesGuessed = new ArrayList<>(0);
+    public List<Unit> foodGuessed = new ArrayList<>(0);
 
     public List<Unit> mainTrace = new ArrayList<>(0);
 
@@ -89,6 +91,29 @@ public class World {
                 processDiff(enemies.get(i), oldEnemy);
             }
         }
+
+        for (Unit guessedFood : prevWorld.foodGuessed) {
+            if (!Utils.containsByPosition(food, guessedFood) && guessedFood.guessAge(tickIndex) < 0) {
+                if (!isApproximateVisibleFood(guessedFood)) {
+                    foodGuessed.add(guessedFood);
+                }
+            }
+        }
+
+
+        for (Unit oldFood : prevWorld.food) {
+            if (!Utils.containsByPosition(food, oldFood)) {
+                if (!isApproximateVisibleFood(oldFood)) {
+                    oldFood.addedToGuessedAt = tickIndex;
+                    oldFood.isGuessed = true;
+                    foodGuessed.add(oldFood);
+                }
+            } else {
+                //processDiff(enemies.get(i), oldEnemy);
+            }
+        }
+
+
         mainTrace = prevWorld.mainTrace;
 
         if (tickIndex % 20 == 0) {
@@ -166,6 +191,16 @@ public class World {
         return false;
     }
 
+    private boolean isApproximateVisibleFood(Unit food) {
+        for (int i = 0, minesSize = mines.size(); i < minesSize; i++) {
+            Unit mine = mines.get(i);
+            if (mine.getVisionDistance() - 10 > mine.getDistanceTo(food) - FOOD_RADIUS) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Unit> getAllEnemies() {
         ArrayList<Unit> units = new ArrayList<>(enemiesGuessed);
         units.addAll(enemies);
@@ -177,5 +212,11 @@ public class World {
             return null;
         }
         return Collections.max(mines, Comparator.comparingDouble(value -> value.mass));
+    }
+
+    public List<Unit> getAllFood() {
+        ArrayList<Unit> units = new ArrayList<>(foodGuessed);
+        units.addAll(food);
+        return units;
     }
 }

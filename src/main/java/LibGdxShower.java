@@ -184,7 +184,7 @@ public class LibGdxShower implements ApplicationListener {
                         //mys.log(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
                         //System.out.print(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
                         //    System.out.print((int) v + " ");
-                        shapes.setColor(new Color((133 / 255f), alpha / 255f, (255 - alpha) / 255f, (100 / 255f)));
+                        shapes.setColor(new Color(alpha / 255f, (133 / 255f), (255 - alpha) / 255f, (100 / 255f)));
                         //shapes.setColor(Color.GOLD);
                         shapes.rect(realX, realY, cellSize, cellSize);
                     }

@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collector;
 
@@ -40,13 +41,13 @@ public class Utils {
     @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     public static void log(String s) {
         if (!Main.isLocalRun) {
-             return;
+            return;
         }
         if (queueToLog == null) {
             queueToLog = new LinkedBlockingQueue<>();
             new Thread(() -> {
                 try {
-                 //   PrintWriter out = getPrintWriter();
+                    //   PrintWriter out = getPrintWriter();
                     PrintStream outStream = getPrintStream();
                     for (; ; ) {
                         String take = queueToLog.take();
@@ -110,6 +111,16 @@ public class Utils {
     }
 
     public static double mod(double a, double n) {
-        return a - Math.floor(a/n) * n;
+        return a - Math.floor(a / n) * n;
+    }
+
+    public static boolean containsByPosition(List<Unit> units, Unit unit) {
+        for (int i = 0; i < units.size(); i++) {
+            Unit u = units.get(i);
+            if ((int) u.getX() == (int) unit.getX() && (int) u.getY() == (int) unit.getY()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

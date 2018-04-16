@@ -43,7 +43,7 @@ public class PotentialCalcer {
         Set<Map.Entry<Point2D, Integer>> enemiesToEat = getUnitsCount(true).get(UnitType.ENEMIES_TO_EAT).entrySet();
         Set<Map.Entry<Point2D, Integer>> enemiesNeutral = getUnitsCount(true).get(UnitType.PLAYER).entrySet();
 
-        int currentFoodCount = m.world.food.size();
+        int currentFoodCount = getUnitsCount(true).get(UnitType.FOOD).size();
 
         isShortMove = !(enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount > 0);
 
@@ -284,8 +284,9 @@ public class PotentialCalcer {
 
         {
             //strict {
-            if (true) {   //TODO never enable?
-                int strictgap = (int) (mainUnit.radius / cellSize) + 1;
+            int strictgap = (int) (mainUnit.radius / cellSize);
+            if (strictgap > 0) {   //TODO never enable?    //TODO optimize
+
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
 
@@ -412,7 +413,7 @@ public class PotentialCalcer {
             }
 
             calcUnitCount(m.world.mines);
-            calcUnitCount(m.world.food);
+            calcUnitCount(m.world.getAllFood());
             calcUnitCount(m.world.ejections);
             calcUnitCount(m.world.getAllEnemies());
             calcUnitCount(m.world.viruses);
@@ -783,7 +784,7 @@ public class PotentialCalcer {
                 }
                 Set<Point2D> eatenPoints = null;
                 for (AddShadowData d : data) {
-                    if ((eatenPoints == null || !eatenPoints.contains(d.pos)) && d.pos.squareDistance(x, y) >= d.squareGapDistance) {
+                    if ((eatenPoints == null || !eatenPoints.contains(d.pos)) && d.minePos.squareDistance(x, y) >= d.squareGapDistance) {
 
                         double angleToPoint = Point2D.angle(x - d.minePos.getX(), y - d.minePos.getY());
                         if (itsBetween(angleToPoint, d.minAngle, d.maxAngle)) {

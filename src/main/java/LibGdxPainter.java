@@ -37,6 +37,10 @@ public class LibGdxPainter implements MyStrategyPainter {
             data.objs.add(new LibGdxObj(enemy));
         }
 
+        for (Unit food : myStrategy.world.foodGuessed) {
+            data.objs.add(new LibGdxObj(food));
+        }
+
         for (Unit point : myStrategy.world.mainTrace) {
             data.objs.add(new LibGdxObj(point));
         }
