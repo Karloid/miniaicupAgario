@@ -470,7 +470,15 @@ public class PotentialCalcer {
 
         int timeToFuse = Collections.max(m.world.mines, Comparator.comparingInt(value -> value.timeToFuse)).timeToFuse;
 
-        result = timeToFuse < unit.getDistanceTo(mainUnit) / mainUnit.getSpeedVector().length();
+        if (timeToFuse > 40) {
+            return false;
+        }
+        double length = mainUnit.getSpeedVector().length();
+        if (length <= 0) {
+            length = 1;
+        }
+        double avgDistance = m.world.mines.stream().mapToDouble(mine -> mine.getDistanceTo(unit)).average().getAsDouble();
+        result = timeToFuse < avgDistance / length;
         return result;
     }
 
