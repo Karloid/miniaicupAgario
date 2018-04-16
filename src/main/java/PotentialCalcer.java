@@ -284,7 +284,7 @@ public class PotentialCalcer {
 
         {
             //strict {
-            if (false) {   //TODO never enable?
+            if (true) {   //TODO never enable?
                 int strictgap = (int) (mainUnit.radius / cellSize) + 1;
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
