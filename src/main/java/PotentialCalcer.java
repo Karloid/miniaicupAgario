@@ -440,7 +440,7 @@ public class PotentialCalcer {
                         mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_SCARE);
                         countMap.put(key, countMap.getOrDefault(key, 0) + 1);
-                    } else if (mainUnit.mass / unit.mass > 1.2 && !unit.isGuessed) {
+                    } else if (!unit.isGuessed && (mainUnit.mass / unit.mass > 1.2 || canBeEatenAfterFusion(unit))) {
                         enemyUnits.get(UnitType.ENEMIES_TO_EAT).add(unit);
                         mustAdd = false;
                         Map<Point2D, Integer> countMap = map.get(UnitType.ENEMIES_TO_EAT);
@@ -454,6 +454,24 @@ public class PotentialCalcer {
                 countMap.put(key, countMap.getOrDefault(key, 0) + 1);
             }
         }
+    }
+
+ /*   private boolean canBeEatenAfterFusion(Unit unit) {
+        return m.world.enemies.size() == 1 && m.world.mines.size() > 1;
+    }*/
+
+
+    private boolean canBeEatenAfterFusion(Unit unit) {
+
+        boolean result = /*m.world.enemies.size() == 1 &&*/ m.world.mines.size() > 1;
+        if (!result) {
+            return false;
+        }
+
+        int timeToFuse = Collections.max(m.world.mines, Comparator.comparingInt(value -> value.timeToFuse)).timeToFuse;
+
+        result = timeToFuse < unit.getDistanceTo(mainUnit) / mainUnit.getSpeedVector().length();
+        return result;
     }
 
     private boolean isSafeForMyUnits(Unit enemy) {
