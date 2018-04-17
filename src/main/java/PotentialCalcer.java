@@ -48,8 +48,8 @@ public class PotentialCalcer {
 
         int currentFoodCount = getUnitsCount(true).get(UnitType.FOOD).size();
 
-        //isShortMove = !(enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount > 0);
-        isShortMove = (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount == 0);
+        isShortMove = !(enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount > 0);
+        //isShortMove = (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount == 0);
 
         if (currentFoodCount != lastFoodCount
                 || m.world.getTickIndex() % 15 == 0
@@ -86,7 +86,7 @@ public class PotentialCalcer {
             for (int x = myX - half; x <= myX + half; x++) {
                 for (int y = myY - half; y <= myY + half; y++) {
                     Point2D currentChoice = new Point2D(x, y);
-                    if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius) {
+                    if (lastPotentialMap.mainUnitPosPotential.squareDistance(x, y) > squareCalcRadius || !lastPotentialMap.map.inBounds(x, y)) {
                         continue;
                     }
 
@@ -285,7 +285,7 @@ public class PotentialCalcer {
 
         double visionDistance = mainUnit.getVisionDistance();
         Point2D mainUnitPosPotential = mainUnit.getPos().toPotential();
-        double calcDistancePotential = (visionDistance * 1) / cellSize;
+        double calcDistancePotential = (visionDistance * 2 * 1.5) / cellSize;  //TODO respect to distance fareast enemy
 
         potentialMap.calcDistancePotential = calcDistancePotential;
         potentialMap.mainUnitPosPotential = mainUnitPosPotential;
@@ -589,7 +589,7 @@ public class PotentialCalcer {
                 .min(Comparator.comparingDouble(unit -> unit.getDistanceTo(enemy)));
 
         double minDistance = closesteater.map(unit -> unit.getDistanceTo(enemy) + unit.radius * 0.2).orElseGet(() -> Main.game.GAME_HEIGHT * 2d);
-        long canEatMyUnits = m.world.mines.stream().filter(unit -> enemy.mass / unit.mass > 1.1 && enemy.getDistanceTo(unit) < minDistance).count();
+        long canEatMyUnits = m.world.mines.stream().filter(unit -> enemy.canEatByMass(unit) && enemy.getDistanceTo(unit) < minDistance).count();
         return canEatMyUnits == 0;
     }
 
@@ -683,6 +683,7 @@ public class PotentialCalcer {
             return;
         }
 
+        float v = 100 * factor;
 
         for (Unit mine : m.world.mines) {
 
@@ -710,12 +711,13 @@ public class PotentialCalcer {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
-                            plainArray.set(x, y, plainArray.get(x, y) - 100 * factor);
+
+                            plainArray.set(x, y, plainArray.get(x, y) - v);
                         } else {
                             double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
                             double angleToSpread = Math.PI / 6;
                             if (min < angleToSpread) {
-                                plainArray.set(x, y, plainArray.get(x, y) - 100 * (1 - min / (angleToSpread)));
+                                plainArray.set(x, y, plainArray.get(x, y) - v * (1 - min / (angleToSpread)));
                             }
                         }
                     }

@@ -54,7 +54,7 @@ public class PlainArray {
         checkNewValue(x, y, val);
     }
 
-    private boolean inBounds(int x, int y) {
+    public boolean inBounds(int x, int y) {
         return !(x < 0 || x >= cellsWidth || y < 0 || y >= cellsHeight);
     }
 
