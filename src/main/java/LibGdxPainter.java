@@ -12,6 +12,11 @@ public class LibGdxPainter implements MyStrategyPainter {
         data = new LibGdxDataToPaint();
 
         data.mainUnit = myStrategy.world.getMainUnit();
+
+
+        for (Unit point : myStrategy.world.mainTrace) {
+            data.objs.add(new LibGdxObj(point));
+        }
         
         for (Unit enemy : myStrategy.world.food) {
             data.objs.add(new LibGdxObj(enemy));
@@ -39,10 +44,6 @@ public class LibGdxPainter implements MyStrategyPainter {
 
         for (Unit food : myStrategy.world.foodGuessed) {
             data.objs.add(new LibGdxObj(food));
-        }
-
-        for (Unit point : myStrategy.world.mainTrace) {
-            data.objs.add(new LibGdxObj(point));
         }
 
         for (Unit point : myStrategy.world.splitPredicts) {

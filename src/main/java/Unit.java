@@ -29,6 +29,7 @@ public class Unit {
     public int visibleFood;
 
     private Point2D potentialPos;
+    private Point2D nextPotentialPos;
 
     public Unit(Unit other) {
         this.radius = other.radius;
@@ -255,7 +256,7 @@ public class Unit {
         if (potentialPos == null) {
             potentialPos = getPos().toPotential();
         }
-        return potentialPos;//TODO
+        return potentialPos;
     }
 
     public void onSimulateTick() {
@@ -283,6 +284,7 @@ public class Unit {
         }
 
         potentialPos = null;
+        nextPotentialPos = null;
     }
 
     public boolean canEatByPosition(Unit unit) {
@@ -292,5 +294,17 @@ public class Unit {
             }
         }
         return false;
+    }
+
+    public Point2D getNextPotentialPos() {
+        if (nextPotentialPos == null) {
+            Unit unit = new Unit(this);
+            int ticks = 2;
+            unit.setSpeedVector(getSpeedVector().mul(ticks));
+            unit.onSimulateTick();
+            nextPotentialPos = unit.getPotentialPos();
+        }
+        return nextPotentialPos;
+
     }
 }

@@ -48,7 +48,8 @@ public class PotentialCalcer {
 
         int currentFoodCount = getUnitsCount(true).get(UnitType.FOOD).size();
 
-        isShortMove = !(enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount > 0);
+        //isShortMove = !(enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount > 0);
+        isShortMove = (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && currentFoodCount == 0);
 
         if (currentFoodCount != lastFoodCount
                 || m.world.getTickIndex() % 15 == 0
@@ -338,7 +339,7 @@ public class PotentialCalcer {
         }
 
 
-        addCumulToArray(plainArray, enemiesToEat, range, enemiesToScare.isEmpty() ? 10.5f : 1, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
+        addCumulToArray(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_EAT), range, enemiesToScare.isEmpty() ? 10.5f : 1, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
                 mainUnitPosPotential, calcDistancePotential);
 
 
@@ -353,15 +354,18 @@ public class PotentialCalcer {
                     25.4f, -1, mainUnitPosPotential, calcDistancePotential);
         }
         // subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
-        subFromArray(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
+        //subFromArray(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
+        float enemyScareFactor = 50.4f;
+        subFromArray(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), potentialMap.map.cellsWidth * 1.5, enemyScareFactor, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
-        if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
-            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f);
+        //if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
+        if (!enemiesToScare.isEmpty()) {
+            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f, (int) (enemyUnits.get(UnitType.ENEMIES_TO_SCARE).size() * 100 * enemyScareFactor));
         }
 
         subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
-                15.4f, -1, mainUnitPosPotential, calcDistancePotential, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), true);
+                enemyScareFactor, -1, mainUnitPosPotential, calcDistancePotential, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), true);
 
         {
             //strict {
@@ -398,7 +402,7 @@ public class PotentialCalcer {
         return potentialMap;
     }
 
-    private void subCorners(PlainArray plainArray, Point2D calcPoint, double calculateRadius, float ratio) {
+    private void subCorners(PlainArray plainArray, Point2D calcPoint, double calculateRadius, float ratio, int maxValue) {
         Point2D minePos = mainUnit.getPotentialPos();
 
         int mineQ = getMapQuarter(plainArray, minePos.getX(), minePos.getY());
@@ -417,9 +421,9 @@ public class PotentialCalcer {
                     continue;
                 }
 
-                if (getMapQuarter(plainArray, x, y) != mineQ) {
-                    continue;
-                }
+               //if (getMapQuarter(plainArray, x, y) != mineQ) {
+               //    continue;
+               //}
 
                 Point2D point = new Point2D(x, y);
                 double distanceFromCenter = point.getDistanceTo(center);
@@ -428,7 +432,7 @@ public class PotentialCalcer {
                 }
                 double distanceFromRadius = distanceFromCenter - radius;
 
-                plainArray.set(x, y, plainArray.getUnsafe(x, y) - 160 * (distanceFromRadius / diagonalMinusRadius) * ratio);
+                plainArray.set(x, y, plainArray.getUnsafe(x, y) - maxValue * (distanceFromRadius / diagonalMinusRadius) * ratio);
             }
         }
     }
@@ -630,59 +634,39 @@ public class PotentialCalcer {
         }
     }
 
-    private void subEnemies(PlainArray plainArray, double spreadRange, float factor, float minVal,
-                            Point2D calcPoint, double calcRadius) {
 
+    private void subFromArray(PlainArray plainArray, List<Unit> units, double spreadRange, float factor, float minVal,
+                              Point2D calcPoint, double calcRadius) {
 
-        double squareDelta = spreadRange * spreadRange;
-
-        double squareCalcRadius = calcRadius * calcRadius;
-
-        List<Unit> enemies = enemyUnits.get(UnitType.ENEMIES_TO_SCARE);
-        if (enemies.isEmpty()) {
+        if (units.isEmpty()) {
             return;
         }
-        int yy = 10;
+
+        double squareSpread = spreadRange * spreadRange;
+
+        double squareCalcRadius = calcRadius * calcRadius;
 
         for (int x = 0; x < plainArray.cellsWidth; x++) {
             for (int y = 0; y < plainArray.cellsHeight; y++) {
 
-                for (int i = 0, getSize = enemies.size(); i < getSize; i++) {
-                    Unit enemy = enemies.get(i);
-                    Point2D enemyPotential = enemy.getPotentialPos(); //TODO optimize
-
-                    double enemyDanger = ((enemy.radius * 1.2f) / cellSize) + 1;
-                    for (Unit mine : m.world.mines) {
-                        if (!enemy.canEatByMass(mine)) {
-                            continue;
-                        }
-                        if (enemyPotential.getDistanceTo(x, y) <= enemyDanger) {
-                            plainArray.set(x, y, plainArray.getUnsafe(x, y) - 100);
-                        }
-                    }
+                if (isShortMove && calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
                 }
 
-/*
-                for (Map.Entry<Point2D, Integer> entry : unitsCount) {
-                    float val = entry.getValue();
-                    if (val < minVal) {
+                for (Unit entry : units) {
+
+                    float val = 100 * factor;
+                    double squareDist = entry.getNextPotentialPos().squareDistance(x, y);
+                    //
+                    if (squareDist > squareSpread) {
                         continue;
                     }
 
-
-                    val = val * factor;
-                    double squareDist = entry.getKey().squareDistance(x, y);
-
-                    if (squareDist > squareDelta) {
-                        continue;
-                    }
-
-                    double value = (1 - squareDist / squareDelta) * val;
+                    double value = (1 - squareDist / squareSpread) * val;
                     if (value > 1) {
-                        plainArray.set(x, y, plainArray.get(x, y) - value);
+                        plainArray.set(x, y, plainArray.getUnsafe(x, y) - value);
                     }
                 }
-*/
             }
         }
     }
@@ -726,11 +710,12 @@ public class PotentialCalcer {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
-                            plainArray.set(x, y, plainArray.get(x, y) - 100);
+                            plainArray.set(x, y, plainArray.get(x, y) - 100 * factor);
                         } else {
                             double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
-                            if (min < Math.PI / 3) {
-                                plainArray.set(x, y, plainArray.get(x, y) - 100 * (1 - min / (Math.PI / 3)));
+                            double angleToSpread = Math.PI / 6;
+                            if (min < angleToSpread) {
+                                plainArray.set(x, y, plainArray.get(x, y) - 100 * (1 - min / (angleToSpread)));
                             }
                         }
                     }
@@ -814,6 +799,57 @@ public class PotentialCalcer {
                         //   plainArray.set(x, y, Math.max(currentValue, value));
                         value *= 1.2f;
                         if (entry.getKey().getIntX() == x && entry.getKey().getIntY() == y) {
+                            value *= 1.05f;
+                        }
+                        plainArray.set(x, y, currentValue > value ? currentValue + 0.1f * value : value);
+                    } else {
+                        plainArray.set(x, y, Math.max(currentValue, value));
+                    }
+                }
+            }
+        }
+    }
+
+    private void addCumulToArray(PlainArray plainArray, List<Unit> units, double spreadRange,
+                                 float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
+        if (units.isEmpty()) {
+            return;
+        }
+
+        spreadRange -= cumulRangle;
+        double squareDelta = spreadRange * spreadRange; //1.4 - hypot
+        double squareCalcRadius = calculateRadius * calculateRadius;
+        //double visionDistance = mainUnit.getVisionDistance(); //TODO optimize max points to calculate
+
+
+        double squareCumulRange = cumulRangle * cumulRangle;
+        for (int x = 0; x < plainArray.cellsWidth; x++) {
+            for (int y = 0; y < plainArray.cellsHeight; y++) {
+
+                if (isShortMove && calculationPoint.squareDistance(x, y) > squareCalcRadius) {
+                    continue;
+                }
+
+                for (Unit entry : units) {
+                    Point2D point = entry.getNextPotentialPos();
+
+
+                    float count;
+                    count = 100 * factor;
+                    double squareDist = point.squareDistance(x, y);
+
+                    if (squareDelta < squareDist) {
+                        continue;
+                    }
+
+                    double value = (1 - squareDist / squareDelta) * count;
+
+                    double currentValue = plainArray.get(x, y);
+                    if (squareDist <= squareCumulRange/* && currentValue > count*/) {
+                        //plainArray.add(x, y, (currentValue > 0 ? currentValue  * 0.1 : 0) + value);
+                        //   plainArray.set(x, y, Math.max(currentValue, value));
+                        value *= 1.2f;
+                        if (point.getIntX() == x && point.getIntY() == y) {
                             value *= 1.05f;
                         }
                         plainArray.set(x, y, currentValue > value ? currentValue + 0.1f * value : value);
