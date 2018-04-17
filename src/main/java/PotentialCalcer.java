@@ -421,9 +421,9 @@ public class PotentialCalcer {
                     continue;
                 }
 
-               //if (getMapQuarter(plainArray, x, y) != mineQ) {
-               //    continue;
-               //}
+                //if (getMapQuarter(plainArray, x, y) != mineQ) {
+                //    continue;
+                //}
 
                 Point2D point = new Point2D(x, y);
                 double distanceFromCenter = point.getDistanceTo(center);
@@ -686,6 +686,11 @@ public class PotentialCalcer {
         float v = 100 * factor;
 
         for (Unit mine : m.world.mines) {
+            double speedAngle = mine.getSpeedAngle();
+            double speedAngleMirror = getMirroredAngle(speedAngle);
+
+            double speedLength = mine.getSpeedVector().length();
+            Utils.log("mine " + mine.id + " speed " + Utils.format(speedLength));
 
             Point2D minePos = mine.getPotentialPos();
             for (int i = 0, getSize = units.size(); i < getSize; i++) {
@@ -707,11 +712,17 @@ public class PotentialCalcer {
                 double minAngle = Math.min(leftAngle, rightAngle);
                 double maxAngle = Math.max(leftAngle, rightAngle);
 
+
+                double leftAngleMirror = getMirroredAngle(leftAngle);
+                double rightAngleMirror = getMirroredAngle(rightAngle);
+
+                double minAngleMirror = Math.min(leftAngleMirror, rightAngleMirror);
+                double maxAngleMirror = Math.max(leftAngleMirror, rightAngleMirror);
+
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
-
                             plainArray.set(x, y, plainArray.get(x, y) - v);
                         } else {
                             double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
@@ -720,6 +731,28 @@ public class PotentialCalcer {
                                 plainArray.set(x, y, plainArray.get(x, y) - v * (1 - min / (angleToSpread)));
                             }
                         }
+
+                        if (itsBetween(speedAngle, minAngle, maxAngle)) {
+                            if (itsBetween(angleToPoint, minAngleMirror, maxAngleMirror)) {
+                                plainArray.set(x, y, plainArray.get(x, y) - v / 4);
+                            } else {
+                                double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
+                                double angleToSpread = Math.PI / 9;
+                                if (min < angleToSpread) {
+                                    plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (1 - min / (angleToSpread)));
+                                }
+                            }
+                        }
+                        //else
+                        {
+                            double min = getAngleDelta(speedAngleMirror, speedAngleMirror, angleToPoint);
+                            double angleToSpread = Math.PI * 3 / 8;
+                            //double angleToSpread = Math.PI / 3;
+                            if (min < angleToSpread) {
+                                plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (1 - min / (angleToSpread)));
+                            }
+                        }
+
                     }
                 }
 
@@ -727,6 +760,10 @@ public class PotentialCalcer {
         }
 
         int yy = 10;
+    }
+
+    private double getMirroredAngle(double speedAngle) {
+        return speedAngle + (speedAngle > 0 ? -Math.PI : Math.PI);
     }
 
     private double getAngleDelta(double minAngle, double maxAngle, double angleToPoint) {

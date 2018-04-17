@@ -83,7 +83,7 @@ public class LibGdxShower implements ApplicationListener {
                 if (obj.isMy) {
                     //speed vector
                     shapes.setColor(Color.GREEN);
-                    shapes.line(obj.getFX(), obj.getFY(), speedPoint.getFX(), speedPoint.getFY());
+                    shapes.rectLine(obj.getFX(), obj.getFY(), speedPoint.getFX(), speedPoint.getFY(), 2);
 
                     //move vector
                     shapes.setColor(Color.RED);
@@ -91,7 +91,7 @@ public class LibGdxShower implements ApplicationListener {
 
                     //move vector
                     shapes.setColor(Color.BLACK);
-                    shapes.line(obj.getFX(), obj.getFY(), data.move.wantedTargetPos.getFX(), data.move.wantedTargetPos.getFY());
+                    shapes.rectLine(obj.getFX(), obj.getFY(), data.move.wantedTargetPos.getFX(), data.move.wantedTargetPos.getFY(), 2);
                 }
                 Point2D visionCenter = obj.getVisionCenter();
               /*  if (true) {
