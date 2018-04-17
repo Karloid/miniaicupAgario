@@ -58,8 +58,8 @@ public class PotentialCalcer {
         lastFoodCount = currentFoodCount;
 
 
-        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 100 && enemiesNeutral.isEmpty()) {
-            m.move.setSplit(true);
+        if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 120 && enemiesNeutral.isEmpty()) {   //TODO CHECK enemiesNeutralProbably always empty
+            m.move.setSplit(true);                                                                                      //TODO double check it is safe
         }
 
         Point2D averagePoint = mainUnit.getPos();
@@ -187,12 +187,12 @@ public class PotentialCalcer {
     private PotentialMap calcMap() { //TODO improve logic at final stages
 
         //TODO predictions
-        //TODO calc angles
-        //TODO shadows !!!
 
         //TODO do not fear corners if no enemy
         //TODO do not return to places where food was eaten
 
+
+        //TODO increase trace force
 
         m.log("calcMap, ticks without cacl: " + (m.world.tickIndex - lastCalcMapTick));
         lastCalcMapTick = m.world.tickIndex;
@@ -268,11 +268,11 @@ public class PotentialCalcer {
         if (isNoEnemiesHere) {
             //subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
             //        15.4f, -1, mainUnitPosPotential, calcDistancePotential, m.world.mainTrace, false);
-            subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 2 / cellSize,
+            subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 2 / cellSize,  //TODO increase force and radius
                     15.4f, -1, mainUnitPosPotential, calcDistancePotential);
         }
         // subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
-        subFromArray(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        subFromArray(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
         if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
