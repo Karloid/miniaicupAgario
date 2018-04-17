@@ -172,22 +172,20 @@ public class LibGdxShower implements ApplicationListener {
 
                     int alpha = (int) (((Math.pow(root, v)) / delta) * 220);
                     //int alpha = (int) ((v / delta) * 220);
-                    if (alpha > 0) {
-                        int realX = x * cellSize;
-                        int realY = y * cellSize;
-                        int centerX = realX + cellSize / 2;
-                        int centerY = realY + cellSize / 2;
+                    int realX = x * cellSize;
+                    int realY = y * cellSize;
+                    int centerX = realX + cellSize / 2;
+                    int centerY = realY + cellSize / 2;
 
                         /*if (RESTRICTED_PP_DRAW && myGroup.getAveragePoint().squareDistance(centerX, centerY) > squareMaxDistance) {
                             continue; // too far for decide
                         }*/
-                        //mys.log(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
-                        //System.out.print(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
-                        //    System.out.print((int) v + " ");
-                        shapes.setColor(new Color(alpha / 255f, (133 / 255f), (255 - alpha) / 255f, (100 / 255f)));
-                        //shapes.setColor(Color.GOLD);
-                        shapes.rect(realX, realY, cellSize, cellSize);
-                    }
+                    //mys.log(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
+                    //System.out.print(String.format("%s %s %s - v: %s", myGroup.vehicleType, realX, realY, (int) v));
+                    //    System.out.print((int) v + " ");
+                    shapes.setColor(new Color(alpha / 255f, (133 / 255f), (255 - alpha) / 255f, (100 / 255f)));
+                    //shapes.setColor(Color.GOLD);
+                    shapes.rect(realX, realY, cellSize, cellSize);
                 }
             }
 
