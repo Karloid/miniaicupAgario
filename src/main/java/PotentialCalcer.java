@@ -349,7 +349,7 @@ public class PotentialCalcer {
             //        15.4f, -1, mainUnitPosPotential, calcDistancePotential, m.world.mainTrace, false);
             //  subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 4 / cellSize,  //TODO increase force and radius
 //          25.4f / maxVisibleFoodTrace, -1, mainUnitPosPotential, calcDistancePotential);
-            subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 4 / cellSize,  //TODO increase force and radius
+            subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), (visionDistance * 3) / cellSize,  //TODO increase force and radius
                     25.4f, -1, mainUnitPosPotential, calcDistancePotential);
         }
         // subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
