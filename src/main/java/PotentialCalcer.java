@@ -1,6 +1,8 @@
 import java.util.*;
 
 public class PotentialCalcer {
+    public static final int MIN_MASS_TO_SPLIT = 120;
+    public static final int SPLIT_SPEED = 8;
     private final MyStrategy m;
     private int potentialMapCalcAt;
     public static int cellSize = 6;
@@ -142,9 +144,85 @@ public class PotentialCalcer {
             lastBestChoice = bestChoice;
             lastBestChoiceCellSize = cellSize;
             applyMove(bestChoice);
+
+            fireAtEnemyPredict();
         } else {
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
         }
+    }
+
+    private void fireAtEnemyPredict() {
+        if (m.move.split) {
+            return;
+        }
+
+        Unit me = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
+        Optional<Unit> closestEnemy = m.world.enemies.stream().filter(unit -> (me.mass * .5f) / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
+        if (!closestEnemy.isPresent()) {
+            return;
+        }
+        int willBeEatenCount = 0;
+        int willEatCount = 0;
+
+        for (Unit mine : m.world.mines) {
+            if (mine.mass < MIN_MASS_TO_SPLIT) {
+                continue;
+            }
+
+            //TODO check mine unit will be not eaten
+
+            Unit split = new Unit(mine);
+            split.mass = mine.mass / 2;
+            split.radius = 2 * Math.sqrt(split.mass);
+            split.setSpeedVector(split.getSpeedVector().length(SPLIT_SPEED));
+            split.onSimulateTick();
+            m.world.addSplitPredict(split);
+            int tick = 0;
+
+            boolean willEat = false;
+            boolean willBeEaten = false;
+
+            while (split.getSpeedVector().length() > 0.1) {
+                for (Unit enemy : m.world.enemies) {
+                    if (tick > 0) {
+                        enemy = new Unit(enemy);
+                        enemy.setSpeedVector(enemy.getSpeedVector().mul(tick));
+                        enemy.onSimulateTick();
+                        m.world.addSplitPredict(enemy);
+                    }
+
+                    if (enemy.canEatByPosition(split)) {
+                        willBeEaten = true;
+                    } else if (split.canEatByPosition(enemy)) {
+                        willEat = true;
+                    }
+                }
+
+                if (willEat || willBeEaten) {
+                    break;
+                }
+
+                //TODO check can be eaten, or will eat
+                Point2D sv = split.getSpeedVector();
+                double newLength = sv.length() - Main.game.VISCOSITY;
+                split.setSpeedVector(sv.length(newLength));
+                split.onSimulateTick();
+                m.world.addSplitPredict(split);
+                tick++;
+            }
+            if (willBeEaten) {
+                willBeEatenCount++;
+            } else if (willEat) {
+                willEatCount++;
+            }
+        }
+        if (willBeEatenCount == 0 && willEatCount > 0) {
+            m.move.setSplit(true);
+        } else if (willBeEatenCount > 0) {
+            int debug = 1;
+        }
+
+
     }
 
     private void applyMove(Point2D lastBestChoice) {
@@ -506,7 +584,7 @@ public class PotentialCalcer {
         Optional<Unit> closesteater = m.world.mines.stream().filter(unit -> unit.mass / enemy.mass > 1.2)
                 .min(Comparator.comparingDouble(unit -> unit.getDistanceTo(enemy)));
 
-        double minDistance = closesteater.map(unit -> unit.getDistanceTo(enemy) + unit.radius * 0.5).orElseGet(() -> Main.game.GAME_HEIGHT * 2d);
+        double minDistance = closesteater.map(unit -> unit.getDistanceTo(enemy) + unit.radius * 0.2).orElseGet(() -> Main.game.GAME_HEIGHT * 2d);
         long canEatMyUnits = m.world.mines.stream().filter(unit -> enemy.mass / unit.mass > 1.1 && enemy.getDistanceTo(unit) < minDistance).count();
         return canEatMyUnits == 0;
     }
@@ -575,7 +653,7 @@ public class PotentialCalcer {
 
                     double enemyDanger = ((enemy.radius * 1.2f) / cellSize) + 1;
                     for (Unit mine : m.world.mines) {
-                        if (!enemy.canEat(mine)) {
+                        if (!enemy.canEatByMass(mine)) {
                             continue;
                         }
                         if (enemyPotential.getDistanceTo(x, y) <= enemyDanger) {
@@ -627,7 +705,7 @@ public class PotentialCalcer {
             Point2D minePos = mine.getPotentialPos();
             for (int i = 0, getSize = units.size(); i < getSize; i++) {
                 Unit enemy = units.get(i);
-                if (checkCanEat && !enemy.canEat(mine)) {
+                if (checkCanEat && !enemy.canEatByMass(mine)) {
                     continue;
                 }
 

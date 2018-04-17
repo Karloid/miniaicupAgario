@@ -44,7 +44,6 @@ public class MyStrategy {
             initializeTick(me, world, game, move);
             initializeStrategy(world, game);
             log("move start");
-            painter.onStartTick();
              //TODO remember enemies positions
 
 
@@ -57,8 +56,10 @@ public class MyStrategy {
                 potentialCalcer.move();
 
                // fireAtenemy();
-                fireAtenemy();
+               // fireAtenemyPredict();
             }
+
+            painter.onStartTick();
 
             long timeTaken = System.currentTimeMillis() - start;
             elapsed += timeTaken;
@@ -81,29 +82,6 @@ public class MyStrategy {
     }
 
     private boolean fireAtenemy() {
-        Unit me = Collections.max(world.mines, Comparator.comparingDouble(value -> value.mass));
-        Optional<Unit> closestEnemy = world.enemies.stream().filter(unit -> me.mass / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
-        if (closestEnemy.isPresent()) {
-            Unit enemy = closestEnemy.get();
-            log("Moving to enemy! ratio is " + Utils.format(me.mass / enemy.mass) + " " + enemy);
-
-            if ((me.mass * 0.5) / enemy.mass > 1.2) {
-                double angleToEnemy = me.getAngleTo(enemy);
-                double speedAngle = me.getSpeedAngle();
-                if (Math.abs(angleToEnemy - speedAngle) < 0.15 && me.getDistanceTo(enemy) < me.getRadius() * 3) {
-                    log("Also split! angles is enemy" + Utils.format(angleToEnemy) + " speed " + Utils.format(speedAngle));
-                    move.setSplit(true);
-                }
-            }
-
-            return true;
-        }
-        return false;
-    }
-
-    private boolean fireAtenemyPredict() { //TODO
-        //TODO split only if safe
-        //we can split from 120 mass
         Unit me = Collections.max(world.mines, Comparator.comparingDouble(value -> value.mass));
         Optional<Unit> closestEnemy = world.enemies.stream().filter(unit -> me.mass / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
         if (closestEnemy.isPresent()) {
@@ -177,7 +155,7 @@ public class MyStrategy {
         }
 
         if (me.mass > 600) {
-            move.setSplit(true);
+           // move.setSplit(true);
         }
 
         // move.setEject(true);

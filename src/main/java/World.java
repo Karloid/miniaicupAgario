@@ -20,6 +20,7 @@ public class World {
     public List<Unit> foodGuessed = new ArrayList<>(0);
 
     public List<Unit> mainTrace = new ArrayList<>(0);
+    public List<Unit> splitPredicts = new ArrayList<>(0);
 
     public World(JSONObject jsonObject) {
         // Utils.log("World: " + jsonObject.toString());
@@ -149,28 +150,6 @@ public class World {
             enemy.setSpeedVector(newDir);
         }
 
-        enemy.x += enemy.speedX;
-        enemy.y += enemy.speedY;
-
-        double r = enemy.radius;
-        {   //bounds
-            if (enemy.x < 0 + r) {
-                enemy.x = r;
-            }
-
-            if (enemy.y < 0 + r) {
-                enemy.y = r;
-            }
-
-            if (enemy.x > Main.game.GAME_WIDTH - r) {
-                enemy.x = Main.game.GAME_WIDTH - r;
-            }
-
-            if (enemy.y > Main.game.GAME_HEIGHT - r) {
-                enemy.y = Main.game.GAME_HEIGHT - r;
-            }
-        }
-
         enemy.onSimulateTick();
 
         if (!isApproximateVisible(enemy)) {
@@ -219,5 +198,13 @@ public class World {
         ArrayList<Unit> units = new ArrayList<>(foodGuessed);
         units.addAll(food);
         return units;
+    }
+
+    public void addSplitPredict(Unit splited) {
+        if (Main.isLocalRun) {
+            Unit unit = new Unit(splited);
+            unit.type = UnitType.SPLIT_PREDICT;
+            splitPredicts.add(unit);
+        }
     }
 }

@@ -45,6 +45,10 @@ public class LibGdxPainter implements MyStrategyPainter {
             data.objs.add(new LibGdxObj(point));
         }
 
+        for (Unit point : myStrategy.world.splitPredicts) {
+            data.objs.add(new LibGdxObj(point));
+        }
+
     }
 
     @Override

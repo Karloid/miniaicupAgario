@@ -41,9 +41,10 @@ public class Unit {
         this.timeToFuse = other.timeToFuse;
         this.mass = other.mass;
         this.isMy = other.isMy;
-        this.isGuessed = other.isGuessed;
         this.world = other.world;
+        this.isGuessed = other.isGuessed;
         this.addedToGuessedAt = other.addedToGuessedAt;
+        this.visibleFood = other.visibleFood;
     }
 
     public Unit() {
@@ -246,7 +247,7 @@ public class Unit {
         return tickIndex - addedToGuessedAt;
     }
 
-    public boolean canEat(Unit mine) {
+    public boolean canEatByMass(Unit mine) {
         return mass / mine.mass > 1.17;
     }
 
@@ -258,6 +259,38 @@ public class Unit {
     }
 
     public void onSimulateTick() {
+
+        x += speedX;
+        y += speedY;
+
+        double r = radius;
+        {   //bounds
+            if (x < 0 + r) {
+                x = r;
+            }
+
+            if (y < 0 + r) {
+                y = r;
+            }
+
+            if (x > Main.game.GAME_WIDTH - r) {
+                x = Main.game.GAME_WIDTH - r;
+            }
+
+            if (y > Main.game.GAME_HEIGHT - r) {
+                y = Main.game.GAME_HEIGHT - r;
+            }
+        }
+
         potentialPos = null;
+    }
+
+    public boolean canEatByPosition(Unit unit) {
+        if (mass / unit.mass > 1.2) {
+            if (getDistanceTo(unit) < radius - (1 / 3f) * unit.radius) {
+                return true;
+            }
+        }
+        return false;
     }
 }

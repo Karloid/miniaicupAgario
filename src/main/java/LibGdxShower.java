@@ -87,7 +87,7 @@ public class LibGdxShower implements ApplicationListener {
 
                     //move vector
                     shapes.setColor(Color.RED);
-                    shapes.line(obj.getFX(), obj.getFY(), data.move.getFX(), data.move.getFY());
+                    shapes.rectLine(obj.getFX(), obj.getFY(), data.move.getFX(), data.move.getFY(), 2);
 
                     //move vector
                     shapes.setColor(Color.BLACK);
@@ -118,7 +118,7 @@ public class LibGdxShower implements ApplicationListener {
         }
         shapes.end();
 
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+
 
         batch.begin();
         for (LibGdxObj obj : data.objs) {
@@ -129,7 +129,7 @@ public class LibGdxShower implements ApplicationListener {
             }
         }
         batch.end();
-
+        Gdx.gl.glDisable(GL20.GL_BLEND);
         if (!resized) {
             resized = true;
             Gdx.graphics.setWindowedMode(700, 700);
