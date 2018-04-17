@@ -50,6 +50,7 @@ public class LibGdxShower implements ApplicationListener {
         shapes.setProjectionMatrix(camera.combined);
         font = new BitmapFont(true);
         font.setColor(Color.RED);
+        
     }
 
     @Override
@@ -121,9 +122,10 @@ public class LibGdxShower implements ApplicationListener {
 
         batch.begin();
         for (LibGdxObj obj : data.objs) {
-            if (obj.wantPrintMass()) {
-                font.setColor(Color.BLACK);
-                font.draw(batch, Utils.format(obj.mass), obj.getFX() - 10, obj.getFY() - 5);
+            String label = obj.getLabel();
+            if (label != null) {
+                font.setColor(Color.WHITE);
+                font.draw(batch, label, obj.getFX() - 10, obj.getFY() - 5);
             }
         }
         batch.end();

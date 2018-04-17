@@ -25,6 +25,9 @@ public class Unit {
     public boolean isGuessed;
     public World world;
     public int addedToGuessedAt;
+
+    public int visibleFood;
+
     private Point2D potentialPos;
 
     public Unit(Unit other) {

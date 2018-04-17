@@ -20,6 +20,7 @@ public class PotentialCalcer {
 
     private int lastCalcMapTick;
     private boolean isShortMove;
+    private int maxVisibleFoodTrace;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -268,6 +269,8 @@ public class PotentialCalcer {
         if (isNoEnemiesHere) {
             //subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
             //        15.4f, -1, mainUnitPosPotential, calcDistancePotential, m.world.mainTrace, false);
+            //  subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 4 / cellSize,  //TODO increase force and radius
+//          25.4f / maxVisibleFoodTrace, -1, mainUnitPosPotential, calcDistancePotential);
             subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 4 / cellSize,  //TODO increase force and radius
                     25.4f, -1, mainUnitPosPotential, calcDistancePotential);
         }
@@ -417,7 +420,13 @@ public class PotentialCalcer {
             calcUnitCount(m.world.ejections);
             calcUnitCount(m.world.getAllEnemies());
             calcUnitCount(m.world.viruses);
-            calcUnitCount(m.world.mainTrace);
+            if (!m.world.mainTrace.isEmpty()) {
+                maxVisibleFoodTrace = Collections.max(m.world.mainTrace, Comparator.comparingInt(v -> v.visibleFood)).visibleFood;
+                if (maxVisibleFoodTrace == 0) {
+                    maxVisibleFoodTrace = 40;//TODO?
+                }
+                calcUnitCount(m.world.mainTrace);
+            }
         }
 
 
@@ -425,6 +434,13 @@ public class PotentialCalcer {
     }
 
     private void calcUnitCount(List<Unit> units) {
+        boolean isTraceLogic = false;
+        if (!units.isEmpty()) {
+            if (units.get(0).type == UnitType.TRACE) {
+                isTraceLogic = true;
+            }
+        }
+
         for (Unit unit : units) {
             Point2D key = unit.getPos().toPotential();
 
@@ -451,7 +467,11 @@ public class PotentialCalcer {
 
             if (mustAdd) {
                 Map<Point2D, Integer> countMap = map.get(unit.type);
-                countMap.put(key, countMap.getOrDefault(key, 0) + 1);
+                if (isTraceLogic && false) {
+                    countMap.put(key, countMap.getOrDefault(key, 0) + maxVisibleFoodTrace - unit.visibleFood + 1);
+                } else {
+                    countMap.put(key, countMap.getOrDefault(key, 0) + 1);
+                }
             }
         }
     }
@@ -470,7 +490,7 @@ public class PotentialCalcer {
 
         int timeToFuse = Collections.max(m.world.mines, Comparator.comparingInt(value -> value.timeToFuse)).timeToFuse;
 
-        if (timeToFuse > 40) {
+        if (timeToFuse > 20) {
             return false;
         }
         double length = mainUnit.getSpeedVector().length();

@@ -122,6 +122,7 @@ public class World {
             if (mainUnit != null) {
                 Unit t = new Unit(mainUnit);
                 t.type = UnitType.TRACE;
+                t.visibleFood = food.size();
                 mainTrace.add(t);
                 if (mainTrace.size() > 55) {
                     mainTrace.remove(0);

@@ -21,6 +21,7 @@ public class LibGdxObj extends Unit {
         this.isMy = other.isMy;
         this.world = other.world;
         this.isGuessed = other.isGuessed;
+        this.visibleFood = other.visibleFood;
         onConstruct();
     }
 
@@ -82,8 +83,15 @@ public class LibGdxObj extends Unit {
         return (float) radius;
     }
 
-    public boolean wantPrintMass() {
-        return type != UnitType.EJECTION && type != UnitType.VIRUS && type != UnitType.FOOD;
+    public String getLabel() {
+        if (type != UnitType.EJECTION && type != UnitType.VIRUS && type != UnitType.FOOD) {
+            if (type == UnitType.TRACE) {
+                return "f:" + visibleFood;
+            }
+
+            return Utils.format(mass);
+        }
+        return null;
     }
 
 }
