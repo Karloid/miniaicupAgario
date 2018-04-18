@@ -724,18 +724,18 @@ public class PotentialCalcer {
                 double minAngleMirror = Math.min(leftAngleMirror, rightAngleMirror);
                 double maxAngleMirror = Math.max(leftAngleMirror, rightAngleMirror);
 
-                boolean drawEnemyPath = getAngleDelta(angleFromMineToEnemy, angleFromMineToEnemy, speedAngle) < getAngleDelta(mirroredAngleFromMineToEnemy, mirroredAngleFromMineToEnemy, speedAngle);
+                boolean drawEnemyPath = false && getAngleDelta(angleFromMineToEnemy, angleFromMineToEnemy, speedAngle) < getAngleDelta(mirroredAngleFromMineToEnemy, mirroredAngleFromMineToEnemy, speedAngle);
 
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
-                            plainArray.set(x, y, plainArray.get(x, y) - v);
+                            plainArray.set(x, y, plainArray.getUnsafe(x, y) - v);
                         } else {
                             double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
                             double angleToSpread = Math.PI / 6;
                             if (min < angleToSpread) {
-                                plainArray.set(x, y, plainArray.get(x, y) - v * (1 - min / (angleToSpread)));
+                                plainArray.set(x, y, plainArray.getUnsafe(x, y) - v * (1 - min / (angleToSpread)));
                             }
                         }
 
@@ -751,27 +751,25 @@ public class PotentialCalcer {
                         //    }
                         //}
                         ////else
-                        //{
-                        //    double min = getAngleDelta(speedAngleMirror, speedAngleMirror, angleToPoint);
-                        //    //double angleToSpread = Math.PI * 3 / 8;
-                        //    double angleToSpread = Math.PI * 2;
-                        //    if (min < angleToSpread) {
-                        //        plainArray.set(x, y, plainArray.get(x, y) - (v / 2) * (1 - min / (angleToSpread)));
-                        //    }
-                        //}
+                        {
+                            double min = getAngleDelta(speedAngleMirror, speedAngleMirror, angleToPoint);
+                            //double angleToSpread = Math.PI * 3 / 8;
+                            double angleToSpread = Math.PI / 2;
+                            if (min < angleToSpread) {
+                                plainArray.set(x, y, plainArray.getUnsafe(x, y) - (v / 2) * (1 - min / (angleToSpread)));
+                            }
+                        }
 
                         {
-                            double angleToEnemy = Point2D.angle(x - enemyPos.getX(), y - enemyPos.getY());
-
                             if (drawEnemyPath) {
-
+                                double angleToEnemy = Point2D.angle(x - enemyPos.getX(), y - enemyPos.getY());
                                 double min = getAngleDelta(enemySpeedAngle, enemySpeedAngle, angleToEnemy);
                                 if (min < (Math.PI / 180) * 15) {
                                     plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (Math.max(1 - enemyPos.getDistanceTo(x, y) / calcRadius, 0.1)));
                                 } else {
                                     double angleToSpread = (Math.PI / 180) * 25;
                                     if (min < angleToSpread) {
-                                        plainArray.set(x, y, plainArray.get(x, y) - (v / 5) * (1 - min / (angleToSpread)) * (Math.max(1 - enemyPos.getDistanceTo(x, y) / calcRadius, 0.1)));
+                                        plainArray.set(x, y, plainArray.getUnsafe(x, y) - (v / 5) * (1 - min / (angleToSpread)) * (Math.max(1 - enemyPos.getDistanceTo(x, y) / calcRadius, 0.1)));
                                     }
                                 }
                             }

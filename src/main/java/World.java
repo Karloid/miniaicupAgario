@@ -117,7 +117,7 @@ public class World {
 
         mainTrace = prevWorld.mainTrace;
 
-        if (tickIndex % 20 == 0) {
+        if (tickIndex % 30 == 0) {
             Unit mainUnit = prevWorld.getMainUnit();
 
             if (mainUnit != null) {
@@ -125,7 +125,7 @@ public class World {
                 t.type = UnitType.TRACE;
                 t.visibleFood = food.size();
                 mainTrace.add(t);
-                if (mainTrace.size() > 55) {
+                if (mainTrace.size() > 40) {
                     mainTrace.remove(0);
                 }
             }
