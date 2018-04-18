@@ -154,11 +154,16 @@ public class PotentialCalcer {
     }
 
     private void fireAtEnemyPredict() {
-        if (m.move.split) {
+        if (m.move.split || m.world.mines.size() == Main.game.MAX_FRAGS_CNT) {
             return;
         }
 
-        Unit me = Collections.max(m.world.mines, Comparator.comparingDouble(value -> value.mass));
+        int maxNewFragments = Main.game.MAX_FRAGS_CNT - m.world.mines.size();
+
+        List<Unit> mines = new ArrayList<>(m.world.mines);
+        mines.sort(Comparator.<Unit>comparingDouble(value -> value.mass).reversed());
+
+        Unit me = mines.get(0);
         Optional<Unit> closestEnemy = m.world.enemies.stream().filter(unit -> (me.mass * .5f) / unit.mass > 1.2).min(Comparator.comparingDouble(o -> o.getSquaredDistanceTo(me)));
         if (!closestEnemy.isPresent()) {
             return;
@@ -166,9 +171,14 @@ public class PotentialCalcer {
         int willBeEatenCount = 0;
         int willEatCount = 0;
 
-        for (Unit mine : m.world.mines) {
+        for (int i = 0, minesSize = mines.size(); i < minesSize; i++) {
+            Unit mine = mines.get(i);
             if (mine.mass < MIN_MASS_TO_SPLIT) {
                 continue;
+            }
+
+            if (i >= maxNewFragments) {
+                break;
             }
 
             //TODO check mine unit will be not eaten
@@ -197,6 +207,7 @@ public class PotentialCalcer {
                         willBeEaten = true;
                     } else if (split.canEatByPosition(enemy)) {
                         willEat = true;
+                        //TODO add enemy mass recalc radius and do not break loop
                     }
                 }
 
