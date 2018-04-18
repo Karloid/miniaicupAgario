@@ -33,6 +33,7 @@ public class PotentialCalcer {
     }
 
     public void move() {
+        //TODO respect viruses
         //TODO check guessed food
         //TODO fear pleyers more
         //TODO fear players which can split on you
@@ -201,10 +202,15 @@ public class PotentialCalcer {
 
             while (split.getSpeedVector().length() > 0.1) {
                 boolean itsVisible = false;
-                for (Unit mineObserver : m.world.mines) {
-                    if (mineObserver.getVisionDistance() > mineObserver.getDistanceTo(split)) {
-                        itsVisible = true;
-                        break;
+
+                if (split.radius * 3 > distanceToEdge(split)) {
+                    itsVisible = true;
+                } else {
+                    for (Unit mineObserver : m.world.mines) {
+                        if (mineObserver.getVisionDistance() > mineObserver.getDistanceTo(split)) {
+                            itsVisible = true;
+                            break;
+                        }
                     }
                 }
 
@@ -235,6 +241,14 @@ public class PotentialCalcer {
             int debug = 1;
         }
 
+    }
+
+    private double distanceToEdge(Unit split) {
+        double distance = Math.min(split.x, split.y);
+        distance = Math.min(distance, Main.game.GAME_HEIGHT - split.y);
+        distance = Math.min(distance, Main.game.GAME_WIDTH - split.x);
+
+        return distance;
     }
 
     private void fireAtEnemyPredict() {
