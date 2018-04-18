@@ -732,7 +732,7 @@ public class PotentialCalcer {
                             }
                         }
 
-                        if (itsBetween(speedAngle, minAngle, maxAngle)) {
+                        if (!itsBetween(speedAngle, minAngleMirror, maxAngleMirror) && getAngleDelta(speedAngle, minAngleMirror, maxAngleMirror) > Math.PI / 3) {
                             if (itsBetween(angleToPoint, minAngleMirror, maxAngleMirror)) {
                                 plainArray.set(x, y, plainArray.get(x, y) - v / 4);
                             } else {
@@ -746,10 +746,10 @@ public class PotentialCalcer {
                         //else
                         {
                             double min = getAngleDelta(speedAngleMirror, speedAngleMirror, angleToPoint);
-                            double angleToSpread = Math.PI * 3 / 8;
-                            //double angleToSpread = Math.PI / 3;
+                            //double angleToSpread = Math.PI * 3 / 8;
+                            double angleToSpread = Math.PI * 2;
                             if (min < angleToSpread) {
-                                plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (1 - min / (angleToSpread)));
+                                plainArray.set(x, y, plainArray.get(x, y) - (v / 2) * (1 - min / (angleToSpread)));
                             }
                         }
 
