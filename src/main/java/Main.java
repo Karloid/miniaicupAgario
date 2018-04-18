@@ -50,7 +50,14 @@ public class Main {
         }
         if (isLocalRun) {
             System.setErr(Utils.getPrintStream());
-            System.setOut(new PrintStream(new TeeOutputStream(Utils.getPrintStream(), System.out)));
+            System.setOut(new PrintStream(new TeeOutputStream(Utils.getPrintStream(), System.out)) {
+                @Override
+                public void println(String x) {
+                    if (x.startsWith("{")) {
+                        super.println(x);
+                    }
+                }
+            });
             Utils.log("Start " + new Date());
         }
 

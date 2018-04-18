@@ -285,7 +285,7 @@ public class PotentialCalcer {
 
         double visionDistance = mainUnit.getVisionDistance();
         Point2D mainUnitPosPotential = mainUnit.getPos().toPotential();
-        double calcDistancePotential = (visionDistance * 2 * 1.5) / cellSize;  //TODO respect to distance fareast enemy
+        double calcDistancePotential = (visionDistance * 2 * 1.0) / cellSize;  //TODO respect to distance fareast enemy
 
         potentialMap.calcDistancePotential = calcDistancePotential;
         potentialMap.mainUnitPosPotential = mainUnitPosPotential;
@@ -331,7 +331,7 @@ public class PotentialCalcer {
             }
 
             //TODO shadows from food
-            // addCumulToArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
+            // addCumulToArrayUnits(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
             //         mainUnitPosPotential, calcDistancePotential);
 
             addShadowsArray(plainArray, food, range, 2.5f, (int) (Math.max(mainUnit.radius, cellSize) / cellSize),
@@ -339,7 +339,7 @@ public class PotentialCalcer {
         }
 
 
-        addCumulToArray(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_EAT), range, enemiesToScare.isEmpty() ? 10.5f : 1, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
+        addCumulToArrayUnits(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_EAT), range, enemiesToScare.isEmpty() ? 10.5f : 1, (int) (Math.max(mainUnit.radius * 0.5, cellSize) / cellSize),
                 mainUnitPosPotential, calcDistancePotential);
 
 
@@ -359,9 +359,11 @@ public class PotentialCalcer {
         subFromArrayUnits(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), potentialMap.map.cellsWidth * 1.5, enemyScareFactor, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
-        //if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
-        if (!enemiesToScare.isEmpty()) {
-            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f, (int) (enemyUnits.get(UnitType.ENEMIES_TO_SCARE).size() * 100 * enemyScareFactor));
+        if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
+        //if (!enemiesToScare.isEmpty()) {
+            int maxValue = (int) (enemyUnits.get(UnitType.ENEMIES_TO_SCARE).size() * 100 * enemyScareFactor);
+            maxValue = Math.max(maxValue, 160);
+            subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f, maxValue);
         }
 
         subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
@@ -728,6 +730,11 @@ public class PotentialCalcer {
 
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
+
+                        if (isShortMove && calcPoint.squareDistance(x, y) > squareCalcRadius) {
+                            continue;
+                        }
+                        
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
                             plainArray.set(x, y, plainArray.getUnsafe(x, y) - v);
@@ -871,8 +878,8 @@ public class PotentialCalcer {
         }
     }
 
-    private void addCumulToArray(PlainArray plainArray, List<Unit> units, double spreadRange,
-                                 float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
+    private void addCumulToArrayUnits(PlainArray plainArray, List<Unit> units, double spreadRange,
+                                      float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
         if (units.isEmpty()) {
             return;
         }

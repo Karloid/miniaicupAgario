@@ -117,7 +117,7 @@ public class World {
 
         mainTrace = prevWorld.mainTrace;
 
-        if (tickIndex % 30 == 0) {
+        if (tickIndex % 20 == 0) {
             Unit mainUnit = prevWorld.getMainUnit();
 
             if (mainUnit != null) {
@@ -125,8 +125,18 @@ public class World {
                 t.type = UnitType.TRACE;
                 t.visibleFood = food.size();
                 mainTrace.add(t);
-                if (mainTrace.size() > 40) {
+                if (mainTrace.size() > 75) {
                     mainTrace.remove(0);
+                    mainTrace.remove(3);
+                    mainTrace.remove(4);
+                    mainTrace.remove(5);
+                    mainTrace.remove(6);
+                    mainTrace.remove(7);
+                    mainTrace.remove(8);
+                    mainTrace.remove(9);
+                    mainTrace.remove(10);
+                    mainTrace.remove(11);
+                    mainTrace.remove(12);
                 }
             }
         }
