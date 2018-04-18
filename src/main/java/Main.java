@@ -8,6 +8,7 @@ import java.util.Scanner;
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/xout/ms.jar true
 java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005,quiet=y -jar /Users/fox/projects/miniaicup2/xout/ms.jar true
 
+﻿java -jar /Users/fox/projects/miniaicup2/xout/11685.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/xout/11545.jar - shit
 ﻿java -jar /Users/fox/projects/miniaicup2/xout/11538.jar
 ﻿java -jar /Users/fox/projects/miniaicup2/xout/11368.jar - prod
