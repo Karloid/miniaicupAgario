@@ -148,6 +148,7 @@ public class PotentialCalcer {
 
             fireAtEnemyPredict();
         } else {
+            applyMove(new Point2D(lastPotentialMap.map.cellsWidth / 2, lastPotentialMap.map.cellsHeight / 2));
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
         }
     }
@@ -206,6 +207,9 @@ public class PotentialCalcer {
                 //TODO check can be eaten, or will eat
                 Point2D sv = split.getSpeedVector();
                 double newLength = sv.length() - Main.game.VISCOSITY;
+                if (newLength < 0) {
+                    newLength = 0;
+                }
                 split.setSpeedVector(sv.length(newLength));
                 split.onSimulateTick();
                 m.world.addSplitPredict(split);

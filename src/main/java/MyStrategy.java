@@ -24,7 +24,7 @@ public class MyStrategy {
     private Point2D nextRandomPoint;
     private int randomPointGeneratedTick = -99999;
     private Unit lastFoodTarget;
-    
+
     private World prevWorld;
 
     public MyStrategy() {
@@ -44,7 +44,7 @@ public class MyStrategy {
             initializeTick(me, world, game, move);
             initializeStrategy(world, game);
             log("move start");
-             //TODO remember enemies positions
+            //TODO remember enemies positions
 
 
             if (world.mines.isEmpty()) {
@@ -55,19 +55,19 @@ public class MyStrategy {
 
                 potentialCalcer.move();
 
-               // fireAtenemy();
-               // fireAtenemyPredict();
+                // fireAtenemy();
+                // fireAtenemyPredict();
             }
 
             painter.onStartTick();
 
             long timeTaken = System.currentTimeMillis() - start;
             elapsed += timeTaken;
-            if (timeTaken > 400) {
-                log("too much work " + timeTaken);
+            if (timeTaken > 10) {
+                log("time_tick " + timeTaken);
             }
-            if (world.getTickIndex() % 1000 == 0) {
-                log("time taken total: " + elapsed);
+            if (world.getTickIndex() % 500 == 0) {
+                log("time_total " + elapsed + " mean per tick " + Utils.format((elapsed * 1f) / world.tickIndex));
             }
 
             painter.onEndTick();
@@ -155,7 +155,7 @@ public class MyStrategy {
         }
 
         if (me.mass > 600) {
-           // move.setSplit(true);
+            // move.setSplit(true);
         }
 
         // move.setEject(true);
