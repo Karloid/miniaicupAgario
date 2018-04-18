@@ -66,7 +66,7 @@ public class PotentialCalcer {
 
 
         if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 120 && enemiesNeutral.isEmpty()) {   //TODO CHECK enemiesNeutralProbably always empty
-            m.move.setSplit(true);                                                                                      //TODO double check it is safe
+            splitIfVisible();                                                                                      //TODO double check it is safe
         }
 
         Point2D averagePoint = mainUnit.getPos();
@@ -154,6 +154,87 @@ public class PotentialCalcer {
             applyMove(new Point2D(lastPotentialMap.map.cellsWidth / 2, lastPotentialMap.map.cellsHeight / 2));
             m.log(Utils.WARN + "POTENTIAL BEST CHOICE NOT FOUND");
         }
+    }
+
+    private void splitIfVisible() {
+        //m.move.setSplit(true);
+
+        if (m.move.split || m.world.mines.size() == Main.game.MAX_FRAGS_CNT) {
+            return;
+        }
+
+        int fragmentsCanSplit = Main.game.MAX_FRAGS_CNT - m.world.mines.size();
+
+        List<Unit> mines = new ArrayList<>(m.world.mines);
+        mines.sort(Comparator.<Unit>comparingDouble(value -> value.mass).reversed());
+
+        Unit me = mines.get(0);
+
+        int willBeInvisibleCount = 0;
+
+        for (int i = 0, minesSize = mines.size(); i < minesSize; i++) {
+            Unit mine = mines.get(i);
+            if (mine.mass < MIN_MASS_TO_SPLIT) {
+                continue;
+            }
+
+            if (m.getAge(mine) <= fragmentIsFastTicks) {
+                continue;
+            }
+
+            if (fragmentsCanSplit == 0) {
+                break;
+            }
+            fragmentsCanSplit--;
+
+            //TODO check mine unit will be not eaten
+
+            Unit split = new Unit(mine);
+            split.mass = mine.mass / 2;
+            split.recalcRadius();
+            split.setSpeedVector(split.getSpeedVector().length(SPLIT_SPEED));
+            split.onSimulateTick();
+            m.world.addSplitPredict(split);
+            int tick = 0;
+
+            boolean willBeInvisible = false;
+
+            while (split.getSpeedVector().length() > 0.1) {
+                boolean itsVisible = false;
+                for (Unit mineObserver : m.world.mines) {
+                    if (mineObserver.getVisionDistance() > mineObserver.getDistanceTo(split)) {
+                        itsVisible = true;
+                        break;
+                    }
+                }
+
+                if (!itsVisible) {
+                    willBeInvisible = true;
+                    break;
+                }
+
+                //TODO check can be eaten, or will eat
+                Point2D sv = split.getSpeedVector();
+                double newLength = sv.length() - Main.game.VISCOSITY;
+                if (newLength < 0) {
+                    newLength = 0;
+                }
+                split.setSpeedVector(sv.length(newLength));
+                split.onSimulateTick();
+                m.world.addSplitPredict(split);
+                tick++;
+            }
+
+            if (willBeInvisible) {
+                willBeInvisibleCount++;
+            }
+        }
+        if (willBeInvisibleCount == 0) {
+            m.move.setSplit(true);
+        } else {
+            int debug = 1;
+        }
+
     }
 
     private void fireAtEnemyPredict() {
