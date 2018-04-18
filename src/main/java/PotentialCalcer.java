@@ -348,15 +348,15 @@ public class PotentialCalcer {
         if (isNoEnemiesHere) {
             //subEnemiesShadows(plainArray, visionDistance * 2 / cellSize,
             //        15.4f, -1, mainUnitPosPotential, calcDistancePotential, m.world.mainTrace, false);
-            //  subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 4 / cellSize,  //TODO increase force and radius
+            //  subFromArrayUnits(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), visionDistance * 4 / cellSize,  //TODO increase force and radius
 //          25.4f / maxVisibleFoodTrace, -1, mainUnitPosPotential, calcDistancePotential);
             subFromArray(plainArray, getUnitsCount(false).get(UnitType.TRACE).entrySet(), (visionDistance * 3) / cellSize,  //TODO increase force and radius
                     25.4f, -1, mainUnitPosPotential, calcDistancePotential);
         }
-        // subFromArray(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
-        //subFromArray(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
+        // subFromArrayUnits(plainArray, enemiesToScare, visionDistance * 2 / cellSize, 50.4f, -1, mainUnitPosPotential, calcDistancePotential);
+        //subFromArrayUnits(plainArray, enemiesToScare, potentialMap.map.cellsWidth * 1.5, 50.4f, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
         float enemyScareFactor = 50.4f;
-        subFromArray(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), potentialMap.map.cellsWidth * 1.5, enemyScareFactor, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
+        subFromArrayUnits(plainArray, enemyUnits.get(UnitType.ENEMIES_TO_SCARE), potentialMap.map.cellsWidth * 1.5, enemyScareFactor, -1, mainUnitPosPotential, calcDistancePotential); //TODO handle enemy angles
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
         //if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
@@ -635,8 +635,8 @@ public class PotentialCalcer {
     }
 
 
-    private void subFromArray(PlainArray plainArray, List<Unit> units, double spreadRange, float factor, float minVal,
-                              Point2D calcPoint, double calcRadius) {
+    private void subFromArrayUnits(PlainArray plainArray, List<Unit> units, double spreadRange, float factor, float minVal,
+                                   Point2D calcPoint, double calcRadius) {
 
         if (units.isEmpty()) {
             return;
@@ -699,12 +699,17 @@ public class PotentialCalcer {
                     continue;
                 }
 
+                float enemySpeedAngle = enemy.getSpeedVector().angle();
                 double enemyDanger = (enemy.radius * 1.2f) / cellSize;
 
-                Point2D vectorToEnemy = enemy.getPotentialPos().sub(minePos);
+                Point2D enemyPos = enemy.getPotentialPos();
+                Point2D vectorToEnemy = enemyPos.sub(minePos);
 
-                Point2D leftEnemy = enemy.getPotentialPos().add(vectorToEnemy.leftPerpendicular().length(enemyDanger));
-                Point2D rightEnemy = enemy.getPotentialPos().add(vectorToEnemy.rightPerpendicular().length(enemyDanger));
+                float angleFromMineToEnemy = vectorToEnemy.angle();
+                double mirroredAngleFromMineToEnemy = getMirroredAngle(angleFromMineToEnemy);
+
+                Point2D leftEnemy = enemyPos.add(vectorToEnemy.leftPerpendicular().length(enemyDanger));
+                Point2D rightEnemy = enemyPos.add(vectorToEnemy.rightPerpendicular().length(enemyDanger));
 
                 double leftAngle = leftEnemy.sub(minePos).angle();
                 double rightAngle = rightEnemy.sub(minePos).angle();
@@ -719,6 +724,8 @@ public class PotentialCalcer {
                 double minAngleMirror = Math.min(leftAngleMirror, rightAngleMirror);
                 double maxAngleMirror = Math.max(leftAngleMirror, rightAngleMirror);
 
+                boolean drawEnemyPath = getAngleDelta(angleFromMineToEnemy, angleFromMineToEnemy, speedAngle) < getAngleDelta(mirroredAngleFromMineToEnemy, mirroredAngleFromMineToEnemy, speedAngle);
+
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
@@ -732,24 +739,41 @@ public class PotentialCalcer {
                             }
                         }
 
-                        if (!itsBetween(speedAngle, minAngleMirror, maxAngleMirror) && getAngleDelta(speedAngle, minAngleMirror, maxAngleMirror) > Math.PI / 3) {
-                            if (itsBetween(angleToPoint, minAngleMirror, maxAngleMirror)) {
-                                plainArray.set(x, y, plainArray.get(x, y) - v / 4);
-                            } else {
-                                double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
-                                double angleToSpread = Math.PI / 9;
-                                if (min < angleToSpread) {
-                                    plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (1 - min / (angleToSpread)));
-                                }
-                            }
-                        }
-                        //else
+                        //if (!itsBetween(speedAngle, minAngleMirror, maxAngleMirror) && getAngleDelta(speedAngle, minAngleMirror, maxAngleMirror) > Math.PI / 3) {
+                        //    if (itsBetween(angleToPoint, minAngleMirror, maxAngleMirror)) {
+                        //        plainArray.set(x, y, plainArray.get(x, y) - v / 4);
+                        //    } else {
+                        //        double min = getAngleDelta(minAngle, maxAngle, angleToPoint);
+                        //        double angleToSpread = Math.PI / 9;
+                        //        if (min < angleToSpread) {
+                        //            plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (1 - min / (angleToSpread)));
+                        //        }
+                        //    }
+                        //}
+                        ////else
+                        //{
+                        //    double min = getAngleDelta(speedAngleMirror, speedAngleMirror, angleToPoint);
+                        //    //double angleToSpread = Math.PI * 3 / 8;
+                        //    double angleToSpread = Math.PI * 2;
+                        //    if (min < angleToSpread) {
+                        //        plainArray.set(x, y, plainArray.get(x, y) - (v / 2) * (1 - min / (angleToSpread)));
+                        //    }
+                        //}
+
                         {
-                            double min = getAngleDelta(speedAngleMirror, speedAngleMirror, angleToPoint);
-                            //double angleToSpread = Math.PI * 3 / 8;
-                            double angleToSpread = Math.PI * 2;
-                            if (min < angleToSpread) {
-                                plainArray.set(x, y, plainArray.get(x, y) - (v / 2) * (1 - min / (angleToSpread)));
+                            double angleToEnemy = Point2D.angle(x - enemyPos.getX(), y - enemyPos.getY());
+
+                            if (drawEnemyPath) {
+
+                                double min = getAngleDelta(enemySpeedAngle, enemySpeedAngle, angleToEnemy);
+                                if (min < (Math.PI / 180) * 15) {
+                                    plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (Math.max(1 - enemyPos.getDistanceTo(x, y) / calcRadius, 0.1)));
+                                } else {
+                                    double angleToSpread = (Math.PI / 180) * 25;
+                                    if (min < angleToSpread) {
+                                        plainArray.set(x, y, plainArray.get(x, y) - (v / 5) * (1 - min / (angleToSpread)) * (Math.max(1 - enemyPos.getDistanceTo(x, y) / calcRadius, 0.1)));
+                                    }
+                                }
                             }
                         }
 
