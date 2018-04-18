@@ -26,6 +26,7 @@ public class MyStrategy {
     private Unit lastFoodTarget;
 
     private World prevWorld;
+    private Map<String, Integer> createdFragment = new HashMap<>();
 
     public MyStrategy() {
         if (activePainter != null) {
@@ -205,6 +206,13 @@ public class MyStrategy {
 
         um.initializeTick();
 
+
+        for (Unit mine : world.mines) {
+            if (!createdFragment.containsKey(mine.id)) {
+                createdFragment.put(mine.id, world.tickIndex);
+            }
+        }
+
     }
 
     private void initializeStrategy(World world, Game game) {
@@ -221,5 +229,13 @@ public class MyStrategy {
 
     public void log(String s) {
         Utils.log((world == null ? "0" : world.tickIndex) + ": " + s);
+    }
+
+    public int getAge(Unit mine) {
+        Integer integer = createdFragment.get(mine.id);
+        if (integer == null) {
+            return 100; //STRANGE
+        }
+        return world.tickIndex - integer;
     }
 }

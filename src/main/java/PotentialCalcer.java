@@ -25,6 +25,9 @@ public class PotentialCalcer {
     private int maxVisibleFoodTrace;
 
 
+    private int fragmentIsFastTicks = (int) (8 / Main.game.VISCOSITY) + 1;
+
+
     public PotentialCalcer(MyStrategy m) {
         this.m = m;
     }
@@ -158,7 +161,7 @@ public class PotentialCalcer {
             return;
         }
 
-        int maxNewFragments = Main.game.MAX_FRAGS_CNT - m.world.mines.size();
+        int fragmentsCanSplit = Main.game.MAX_FRAGS_CNT - m.world.mines.size();
 
         List<Unit> mines = new ArrayList<>(m.world.mines);
         mines.sort(Comparator.<Unit>comparingDouble(value -> value.mass).reversed());
@@ -177,9 +180,14 @@ public class PotentialCalcer {
                 continue;
             }
 
-            if (i >= maxNewFragments) {
+            if (m.getAge(mine) <= fragmentIsFastTicks) {
+                continue;
+            }
+
+            if (fragmentsCanSplit == 0) {
                 break;
             }
+            fragmentsCanSplit--;
 
             //TODO check mine unit will be not eaten
 
