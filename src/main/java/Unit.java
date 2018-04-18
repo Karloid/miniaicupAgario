@@ -307,4 +307,8 @@ public class Unit {
         return nextPotentialPos;
 
     }
+
+    public void recalcRadius() {
+        radius = 2 * Math.sqrt(mass);
+    }
 }

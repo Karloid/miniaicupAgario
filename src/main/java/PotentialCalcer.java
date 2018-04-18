@@ -185,7 +185,7 @@ public class PotentialCalcer {
 
             Unit split = new Unit(mine);
             split.mass = mine.mass / 2;
-            split.radius = 2 * Math.sqrt(split.mass);
+            split.recalcRadius();
             split.setSpeedVector(split.getSpeedVector().length(SPLIT_SPEED));
             split.onSimulateTick();
             m.world.addSplitPredict(split);
@@ -194,8 +194,13 @@ public class PotentialCalcer {
             boolean willEat = false;
             boolean willBeEaten = false;
 
+            List<Unit> enemies = m.world.enemies;
+
+            enemies.sort(Comparator.comparingDouble(value -> value.mass));
+
             while (split.getSpeedVector().length() > 0.1) {
-                for (Unit enemy : m.world.enemies) {
+                List<Unit> enemiesEaten = new ArrayList<>(0);
+                for (Unit enemy : enemies) {
                     if (tick > 0) {
                         enemy = new Unit(enemy);
                         enemy.setSpeedVector(enemy.getSpeedVector().mul(tick));
@@ -205,13 +210,17 @@ public class PotentialCalcer {
 
                     if (enemy.canEatByPosition(split)) {
                         willBeEaten = true;
+                        break;
                     } else if (split.canEatByPosition(enemy)) {
                         willEat = true;
-                        //TODO add enemy mass recalc radius and do not break loop
+                        split.mass += enemy.mass;
+                        split.recalcRadius();
+                        enemiesEaten.add(enemy);
                     }
                 }
+                enemies.removeAll(enemiesEaten);
 
-                if (willEat || willBeEaten) {
+                if (willBeEaten) {
                     break;
                 }
 
@@ -228,7 +237,8 @@ public class PotentialCalcer {
             }
             if (willBeEaten) {
                 willBeEatenCount++;
-            } else if (willEat) {
+            }
+            if (willEat) {
                 willEatCount++;
             }
         }
