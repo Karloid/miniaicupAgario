@@ -360,7 +360,7 @@ public class PotentialCalcer {
 
         //subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, enemiesToScare.isEmpty() ? 0.005f : 1f);
         if (!(!enemiesToEat.isEmpty() && enemiesToScare.isEmpty())) {
-        //if (!enemiesToScare.isEmpty()) {
+            //if (!enemiesToScare.isEmpty()) {
             int maxValue = (int) (enemyUnits.get(UnitType.ENEMIES_TO_SCARE).size() * 100 * enemyScareFactor);
             maxValue = Math.max(maxValue, 160);
             subCorners(plainArray, mainUnitPosPotential, calcDistancePotential, 1f, maxValue);
@@ -726,7 +726,10 @@ public class PotentialCalcer {
                 double minAngleMirror = Math.min(leftAngleMirror, rightAngleMirror);
                 double maxAngleMirror = Math.max(leftAngleMirror, rightAngleMirror);
 
-                boolean drawEnemyPath = false && getAngleDelta(angleFromMineToEnemy, angleFromMineToEnemy, speedAngle) < getAngleDelta(mirroredAngleFromMineToEnemy, mirroredAngleFromMineToEnemy, speedAngle);
+                //boolean drawEnemyPathFirst = enemy.getSpeedVector().length() > 2; //quite good
+                boolean drawEnemyPathFirst = enemy.getSpeedVector().length() >= speedLength; //quite good
+                boolean drawEnemyPath = drawEnemyPathFirst && getAngleDelta(angleFromMineToEnemy, angleFromMineToEnemy, speedAngle) < getAngleDelta(mirroredAngleFromMineToEnemy, mirroredAngleFromMineToEnemy, speedAngle);
+                //boolean drawEnemyPath = drawEnemyPathFirst;
 
                 for (int x = 0; x < plainArray.cellsWidth; x++) {
                     for (int y = 0; y < plainArray.cellsHeight; y++) {
@@ -734,7 +737,7 @@ public class PotentialCalcer {
                         if (isShortMove && calcPoint.squareDistance(x, y) > squareCalcRadius) {
                             continue;
                         }
-                        
+
                         double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
                         if (itsBetween(angleToPoint, minAngle, maxAngle)) {
                             plainArray.set(x, y, plainArray.getUnsafe(x, y) - v);
@@ -769,8 +772,8 @@ public class PotentialCalcer {
 
                         {
                             if (drawEnemyPath) {
-                                double angleToEnemy = Point2D.angle(x - enemyPos.getX(), y - enemyPos.getY());
-                                double min = getAngleDelta(enemySpeedAngle, enemySpeedAngle, angleToEnemy);
+                                double angleToEnemyFromPoint = Point2D.angle(x - enemyPos.getX(), y - enemyPos.getY());
+                                double min = getAngleDelta(enemySpeedAngle, enemySpeedAngle, angleToEnemyFromPoint);
                                 if (min < (Math.PI / 180) * 15) {
                                     plainArray.set(x, y, plainArray.get(x, y) - (v / 4) * (Math.max(1 - enemyPos.getDistanceTo(x, y) / calcRadius, 0.1)));
                                 } else {
