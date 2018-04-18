@@ -50,7 +50,7 @@ public class LibGdxShower implements ApplicationListener {
         shapes.setProjectionMatrix(camera.combined);
         font = new BitmapFont(true);
         font.setColor(Color.RED);
-        
+
     }
 
     @Override
@@ -90,8 +90,10 @@ public class LibGdxShower implements ApplicationListener {
                     shapes.rectLine(obj.getFX(), obj.getFY(), data.move.getFX(), data.move.getFY(), 2);
 
                     //move vector
-                    shapes.setColor(Color.BLACK);
-                    shapes.rectLine(obj.getFX(), obj.getFY(), data.move.wantedTargetPos.getFX(), data.move.wantedTargetPos.getFY(), 2);
+                    if (data.move.wantedTargetPos != null) {
+                        shapes.setColor(Color.BLACK);
+                        shapes.rectLine(obj.getFX(), obj.getFY(), data.move.wantedTargetPos.getFX(), data.move.wantedTargetPos.getFY(), 2);
+                    }
                 }
                 Point2D visionCenter = obj.getVisionCenter();
               /*  if (true) {
@@ -117,7 +119,6 @@ public class LibGdxShower implements ApplicationListener {
             }
         }
         shapes.end();
-
 
 
         batch.begin();

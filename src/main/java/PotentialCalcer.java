@@ -26,6 +26,8 @@ public class PotentialCalcer {
 
 
     private int fragmentIsFastTicks = (int) (8 / Main.game.VISCOSITY) + 1;
+    private boolean someEnemiesEatAfterFood;
+    private int timeToFuse;
 
 
     public PotentialCalcer(MyStrategy m) {
@@ -44,6 +46,7 @@ public class PotentialCalcer {
 
         myUnitsCount = null;
         enemyUnitsCount = null;
+        someEnemiesEatAfterFood = false;
 
 
         Set<Map.Entry<Point2D, Integer>> enemiesToScare = getUnitsCount(true).get(UnitType.ENEMIES_TO_SCARE).entrySet();
@@ -64,6 +67,19 @@ public class PotentialCalcer {
             potentialMapCalcAt = m.world.getTickIndex();
         }
         lastFoodCount = currentFoodCount;
+
+
+        if (someEnemiesEatAfterFood && timeToFuse < 6 && enemiesToScare.isEmpty()) {
+            List<Unit> mine = new ArrayList<>(m.world.mines);
+            mine.sort(Comparator.<Unit>comparingDouble(value -> value.mass).reversed());
+            Unit first = mine.get(0);
+            Unit second = mine.get(1);
+
+            Point2D fusionPoint = second.getPos().sub(first.getPos()).div(2).add(first.getPos());
+            m.move.goTo(fusionPoint);
+            m.move.wantedTargetPos = fusionPoint;
+            return;
+        }
 
 
         if (enemiesToScare.isEmpty() && enemiesToEat.isEmpty() && mainUnit.mass > 120 && enemiesNeutral.isEmpty()) {   //TODO CHECK enemiesNeutralProbably always empty
@@ -711,6 +727,10 @@ public class PotentialCalcer {
         }
         double avgDistance = m.world.mines.stream().mapToDouble(mine -> mine.getDistanceTo(unit)).average().getAsDouble();
         result = timeToFuse < avgDistance / length;
+        if (result) {
+            this.timeToFuse = timeToFuse;
+            someEnemiesEatAfterFood = true;
+        }
         return result;
     }
 
