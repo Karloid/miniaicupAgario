@@ -34,6 +34,9 @@ public class PotentialCalcer {
         this.m = m;
     }
 
+    /**
+     * Точка входа, выбирает лучший возможный шаг, пересчитывает потенциальное поле если нужно lastPotentialMap
+     */
     public void move() {
         //TODO respect viruses
         //TODO check guessed food
@@ -408,6 +411,16 @@ public class PotentialCalcer {
         }
     }
 
+    /**
+     * Считает потенциальное поле, потенциально поле с разрешением cell size, позитивные поля генерируются едой
+     * и противниками которых можно съесть, за противниками которых надо боятся генерируется отталкивающая тень, что бы
+     * наш агарик не пытался убежать сквозь врага.
+     * поедание еды считается хитро см addShadowsArray
+     * решение куда ехать принимается в двух режимах,
+     * 1) isShortMove - если есть рядом враги то решение локальное, считаем потенциалы недалеко от себя
+     * 2) поедаем еду - расчет идет по всей карте, что бы съесть за один проход как можно больше еды (агарики летят параллельно и все такое)
+     * @return
+     */
     private PotentialMap calcMap() { //TODO improve logic at final stages
 
         //TODO predictions
@@ -821,6 +834,9 @@ public class PotentialCalcer {
         }
     }
 
+    /**
+     * слегка замороченный расчет - считаем отрицательные тени от врагов, важный момент не ошибится если враг в районе -PI +PI
+     */
     private void subEnemiesShadows(PlainArray plainArray, double spreadRange, float factor, float minVal,
                                    Point2D calcPoint, double calcRadius, List<Unit> units, boolean checkCanEat) {
 
@@ -958,77 +974,6 @@ public class PotentialCalcer {
         return result;
     }
 
-    private void subByPoint(PlainArray plainArray, Point2D point, int val) {
-        plainArray.set(point.getIntX(), point.getIntY(), plainArray.get(point.getIntX(), point.getIntY()) + val);
-    }
-
-    private void addToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange, float factor) {
-        double squareDelta = spreadRange * spreadRange; //1.4 - hypot
-        for (int x = 0; x < plainArray.cellsWidth; x++) {
-            for (int y = 0; y < plainArray.cellsHeight; y++) {
-
-                for (Map.Entry<Point2D, Integer> entry : counts) {
-                    float count;
-                    count = Math.max(100 - entry.getValue(), 1) * factor;
-
-                    double value = (1 - entry.getKey().squareDistance(x, y) / squareDelta) * count;
-                    plainArray.set(x, y, Math.max(plainArray.get(x, y), value));
-                }
-            }
-        }
-    }
-
-    private void addCumulToArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
-                                 float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
-        if (counts.isEmpty()) {
-            return;
-        }
-
-        spreadRange -= cumulRangle;
-        double squareDelta = spreadRange * spreadRange; //1.4 - hypot
-        double squareCalcRadius = calculateRadius * calculateRadius;
-        //double visionDistance = mainUnit.getVisionDistance(); //TODO optimize max points to calculate
-
-
-        double squareCumulRange = cumulRangle * cumulRangle;
-        for (int x = 0; x < plainArray.cellsWidth; x++) {
-            for (int y = 0; y < plainArray.cellsHeight; y++) {
-
-                if (isShortMove && calculationPoint.squareDistance(x, y) > squareCalcRadius) {
-                    continue;
-                }
-
-                for (Map.Entry<Point2D, Integer> entry : counts) {
-                    Point2D point = entry.getKey();
-
-
-                    float count;
-                    count = Math.max(99 + entry.getValue(), 1) * factor;
-                    double squareDist = point.squareDistance(x, y);
-
-                    if (squareDelta < squareDist) {
-                        continue;
-                    }
-
-                    double value = (1 - squareDist / squareDelta) * count;
-
-                    double currentValue = plainArray.get(x, y);
-                    if (squareDist <= squareCumulRange/* && currentValue > count*/) {
-                        //plainArray.add(x, y, (currentValue > 0 ? currentValue  * 0.1 : 0) + value);
-                        //   plainArray.set(x, y, Math.max(currentValue, value));
-                        value *= 1.2f;
-                        if (entry.getKey().getIntX() == x && entry.getKey().getIntY() == y) {
-                            value *= 1.05f;
-                        }
-                        plainArray.set(x, y, currentValue > value ? currentValue + 0.1f * value : value);
-                    } else {
-                        plainArray.set(x, y, Math.max(currentValue, value));
-                    }
-                }
-            }
-        }
-    }
-
     private void addCumulToArrayUnits(PlainArray plainArray, List<Unit> units, double spreadRange,
                                       float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
         if (units.isEmpty()) {
@@ -1080,47 +1025,10 @@ public class PotentialCalcer {
         }
     }
 
-    private void addShadowsArray2(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
-                                  float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
-        if (counts.isEmpty()) {
-            return;
-        }
-
-
-        for (Unit mine : m.world.mines) {
-
-            Point2D minePos = mine.getPotentialPos();
-
-            double countRadius = Math.max((mine.radius * 1) / cellSize, 1);
-            for (Map.Entry<Point2D, Integer> count : counts) {
-
-                Point2D countPos = count.getKey();
-
-                Point2D vectorToCount = countPos.sub(minePos);
-
-                Point2D leftEnemy = countPos.add(vectorToCount.leftPerpendicular().length(countRadius));
-                Point2D rightEnemy = countPos.add(vectorToCount.rightPerpendicular().length(countRadius));
-
-                double leftAngle = leftEnemy.sub(minePos).angle();
-                double rightAngle = rightEnemy.sub(minePos).angle();
-                double minAngle = Math.min(leftAngle, rightAngle);
-                double maxAngle = Math.max(leftAngle, rightAngle);
-
-                for (int x = 0; x < plainArray.cellsWidth; x++) {
-                    for (int y = 0; y < plainArray.cellsHeight; y++) {
-                        double angleToPoint = Point2D.angle(x - minePos.getX(), y - minePos.getY());
-                        if (itsBetween(angleToPoint, minAngle, maxAngle)) {
-                            plainArray.set(x, y, plainArray.get(x, y) + 100 * count.getValue());
-                        }
-                    }
-                }
-
-            }
-        }
-
-        int yy = 10;
-    }
-
+    /**
+     * тут слегка замороченный расчет пересечений с едой, общий смысл - считаем по всему полю - сколько мы съедим еды
+     * если агарик доедет до этой точки, учитывая что одну еду нельзя съесть двумя агариками
+     */
     private void addShadowsArray(PlainArray plainArray, Set<Map.Entry<Point2D, Integer>> counts, double spreadRange,
                                  float factor, int cumulRangle, Point2D calculationPoint, double calculateRadius) {
         if (counts.isEmpty()) {
