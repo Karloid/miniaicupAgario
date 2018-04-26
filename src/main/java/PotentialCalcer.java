@@ -176,6 +176,9 @@ public class PotentialCalcer {
         }
     }
 
+    /**
+     * Спилимся только если наш сплит улетает не дальше области видимости, либо будет рядом с краем карты где по идее мало врагов
+     */
     private void splitIfVisible() {
         //m.move.setSplit(true);
 
@@ -270,6 +273,9 @@ public class PotentialCalcer {
         return distance;
     }
 
+    /**
+     * Стреляем в врагов сплитами, но только если простая аппроксимация\симуляция говорит что мы съедим врага и никто из наших агариков не будет съеден
+     */
     private void fireAtEnemyPredict() {
         if (m.move.split || m.world.mines.size() == Main.game.MAX_FRAGS_CNT) {
             return;
